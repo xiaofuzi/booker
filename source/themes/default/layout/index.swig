@@ -13,14 +13,14 @@
 		<div id="mainContent">
 			<div class="post-archive">
 				<h2>目录</h2>
-			<ol class="posts-index">
+			<ul class="posts-index">
 				{% set categories =  data %}
 				{% for category in categories %}
 						<li>
 							<a href="{{ category.path }}" target="_blank">{{ category.name }}</a>
 						</li>
 				{% endfor %}
-			</ol>
+			</ul>
 			</div>
 		</div>
 	</div>
