@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>
+        
+	字符串的扩展
+
+    </title>
+    <link rel="shortcut icon" href="/public/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="/public/css/public.css">
+    <link rel="stylesheet" href="/public/css/page.css">
+    <link rel="stylesheet" href="/public/css/monokai.min.css">
+</head>
+
+<body>
+    <div id="headerWrapper" class="cf">
+        <header id="header" class="cf">
+            <div id="logo">
+                <h1 class="logo">
+					<a href="/"> 
+	Learn ECMAScript6 the easy way
+</a>
+				</h1>
+            </div>
+        </header>
+    </div>
+    
+<div id="pageWrapper">
+	<div id="mainContent">
+		<article class="post">
+			<h1 id="-">字符串的扩展</h1>
+<p>ES6加强了对Unicode的支持，并且扩展了字符串对象。</p>
+<h2 id="-unicode-">字符的Unicode表示法</h2>
+<p>JavaScript允许采用<code>\uxxxx</code>形式表示一个字符，其中“xxxx”表示字符的码点。</p>
+<pre><code class="lang-javascript">&quot;\u0061&quot;
+// &quot;a&quot;
+</code></pre>
+<p>但是，这种表示法只限于<code>\u0000</code>——<code>\uFFFF</code>之间的字符。超出这个范围的字符，必须用两个双字节的形式表达。</p>
+<pre><code class="lang-javascript">&quot;\uD842\uDFB7&quot;
+// &quot;𠮷&quot;
+
+&quot;\u20BB7&quot;
+// &quot; 7&quot;
+</code></pre>
+<p>上面代码表示，如果直接在“\u”后面跟上超过<code>0xFFFF</code>的数值（比如<code>\u20BB7</code>），JavaScript会理解成“\u20BB+7”。由于<code>\u20BB</code>是一个不可打印字符，所以只会显示一个空格，后面跟着一个7。</p>
+<p>ES6对这一点做出了改进，只要将码点放入大括号，就能正确解读该字符。</p>
+<pre><code class="lang-javascript">&quot;\u{20BB7}&quot;
+// &quot;𠮷&quot;
+
+&quot;\u{41}\u{42}\u{43}&quot;
+// &quot;ABC&quot;
+
+let hello = 123;
+hell\u{6F} // 123
+
+&#39;\u{1F680}&#39; === &#39;\uD83D\uDE80&#39;
+// true
+</code></pre>
+<p>上面代码中，最后一个例子表明，大括号表示法与四字节的UTF-16编码是等价的。</p>
+<p>有了这种表示法之后，JavaScript共有6种方法可以表示一个字符。</p>
+<pre><code class="lang-javascript">&#39;\z&#39; === &#39;z&#39;  // true
+&#39;\172&#39; === &#39;z&#39; // true
+&#39;\x7A&#39; === &#39;z&#39; // true
+&#39;\u007A&#39; === &#39;z&#39; // true
+&#39;\u{7A}&#39; === &#39;z&#39; // true
+</code></pre>
+<h2 id="codepointat-">codePointAt()</h2>
+<p>JavaScript内部，字符以UTF-16的格式储存，每个字符固定为2个字节。对于那些需要4个字节储存的字符（Unicode码点大于0xFFFF的字符），JavaScript会认为它们是两个字符。</p>
+<pre><code class="lang-javascript">var s = &quot;𠮷&quot;;
+
+s.length // 2
+s.charAt(0) // &#39;&#39;
+s.charAt(1) // &#39;&#39;
+s.charCodeAt(0) // 55362
+s.charCodeAt(1) // 57271
+</code></pre>
+<p>上面代码中，汉字“𠮷”的码点是<code>0x20BB7</code>，UTF-16编码为<code>0xD842 0xDFB7</code>（十进制为55362 57271），需要4个字节储存。对于这种4个字节的字符，JavaScript不能正确处理，字符串长度会误判为2，而且<code>charAt</code>方法无法读取整个字符，<code>charCodeAt</code>方法只能分别返回前两个字节和后两个字节的值。</p>
+<p>ES6提供了<code>codePointAt</code>方法，能够正确处理4个字节储存的字符，返回一个字符的码点。</p>
+<pre><code class="lang-javascript">var s = &#39;𠮷a&#39;;
+
+s.codePointAt(0) // 134071
+s.codePointAt(1) // 57271
+
+s.charCodeAt(2) // 97
+</code></pre>
+<p><code>codePointAt</code>方法的参数，是字符在字符串中的位置（从0开始）。上面代码中，JavaScript将“𠮷a”视为三个字符，codePointAt方法在第一个字符上，正确地识别了“𠮷”，返回了它的十进制码点134071（即十六进制的<code>20BB7</code>）。在第二个字符（即“𠮷”的后两个字节）和第三个字符“a”上，<code>codePointAt</code>方法的结果与<code>charCodeAt</code>方法相同。</p>
+<p>总之，<code>codePointAt</code>方法会正确返回32位的UTF-16字符的码点。对于那些两个字节储存的常规字符，它的返回结果与<code>charCodeAt</code>方法相同。</p>
+<p><code>codePointAt</code>方法返回的是码点的十进制值，如果想要十六进制的值，可以使用<code>toString</code>方法转换一下。</p>
+<pre><code class="lang-javascript">var s = &#39;𠮷a&#39;;
+
+s.codePointAt(0).toString(16) // &quot;20bb7&quot;
+s.charCodeAt(2).toString(16) // &quot;61&quot;
+</code></pre>
+<p>你可能注意到了，<code>codePointAt</code>方法的参数，仍然是不正确的。比如，上面代码中，字符<code>a</code>在字符串<code>s</code>的正确位置序号应该是1，但是必须向<code>charCodeAt</code>方法传入2。解决这个问题的一个办法是使用<code>for...of</code>循环，因为它会正确识别32位的UTF-16字符。</p>
+<pre><code class="lang-javascript">var s = &#39;𠮷a&#39;;
+for (let ch of s) {
+  console.log(ch.codePointAt(0).toString(16));
+}
+// &quot;20bb7&quot;
+// &quot;&quot;
+</code></pre>
+<p><code>codePointAt</code>方法是测试一个字符由两个字节还是由四个字节组成的最简单方法。</p>
+<pre><code class="lang-javascript">function is32Bit(c) {
+  return c.codePointAt(0) &gt; 0xFFFF;
+}
+
+is32Bit(&quot;𠮷&quot;) // true
+is32Bit(&quot;a&quot;) // false
+</code></pre>
+<h2 id="string-fromcodepoint-">String.fromCodePoint()</h2>
+<p>ES5提供<code>String.fromCharCode</code>方法，用于从码点返回对应字符，但是这个方法不能识别32位的UTF-16字符（Unicode编号大于<code>0xFFFF</code>）。</p>
+<pre><code class="lang-javascript">String.fromCharCode(0x20BB7)
+// &quot;ஷ&quot;
+</code></pre>
+<p>上面代码中，<code>String.fromCharCode</code>不能识别大于<code>0xFFFF</code>的码点，所以<code>0x20BB7</code>就发生了溢出，最高位<code>2</code>被舍弃了，最后返回码点<code>U+0BB7</code>对应的字符，而不是码点<code>U+20BB7</code>对应的字符。</p>
+<p>ES6提供了<code>String.fromCodePoint</code>方法，可以识别<code>0xFFFF</code>的字符，弥补了<code>String.fromCharCode</code>方法的不足。在作用上，正好与<code>codePointAt</code>方法相反。</p>
+<pre><code class="lang-javascript">String.fromCodePoint(0x20BB7)
+// &quot;𠮷&quot;
+String.fromCodePoint(0x78, 0x1f680, 0x79) === &#39;x\uD83D\uDE80y&#39;
+// true
+</code></pre>
+<p>上面代码中，如果<code>String.fromCharCode</code>方法有多个参数，则它们会被合并成一个字符串返回。</p>
+<p>注意，<code>fromCodePoint</code>方法定义在<code>String</code>对象上，而<code>codePointAt</code>方法定义在字符串的实例对象上。</p>
+<h2 id="-">字符串的遍历器接口</h2>
+<p>ES6为字符串添加了遍历器接口（详见《Iterator》一章），使得字符串可以被<code>for...of</code>循环遍历。</p>
+<pre><code class="lang-javascript">for (let codePoint of &#39;foo&#39;) {
+  console.log(codePoint)
+}
+// &quot;f&quot;
+// &quot;o&quot;
+// &quot;o&quot;
+</code></pre>
+<p>除了遍历字符串，这个遍历器最大的优点是可以识别大于<code>0xFFFF</code>的码点，传统的<code>for</code>循环无法识别这样的码点。</p>
+<pre><code class="lang-javascript">var text = String.fromCodePoint(0x20BB7);
+
+for (let i = 0; i &lt; text.length; i++) {
+  console.log(text[i]);
+}
+// &quot; &quot;
+// &quot; &quot;
+
+for (let i of text) {
+  console.log(i);
+}
+// &quot;𠮷&quot;
+</code></pre>
+<p>上面代码中，字符串<code>text</code>只有一个字符，但是<code>for</code>循环会认为它包含两个字符（都不可打印），而<code>for...of</code>循环会正确识别出这一个字符。</p>
+<h2 id="at-">at()</h2>
+<p>ES5对字符串对象提供<code>charAt</code>方法，返回字符串给定位置的字符。该方法不能识别码点大于<code>0xFFFF</code>的字符。</p>
+<pre><code class="lang-javascript">&#39;abc&#39;.charAt(0) // &quot;a&quot;
+&#39;𠮷&#39;.charAt(0) // &quot;\uD842&quot;
+</code></pre>
+<p>上面代码中，<code>charAt</code>方法返回的是UTF-16编码的第一个字节，实际上是无法显示的。</p>
+<p>ES7提供了字符串实例的<code>at</code>方法，可以识别Unicode编号大于<code>0xFFFF</code>的字符，返回正确的字符。Chrome浏览器已经支持该方法。</p>
+<pre><code class="lang-javascript">&#39;abc&#39;.at(0) // &quot;a&quot;
+&#39;𠮷&#39;.at(0) // &quot;𠮷&quot;
+</code></pre>
+<h2 id="normalize-">normalize()</h2>
+<p>为了表示语调和重音符号，Unicode提供了两种方法。一种是直接提供带重音符号的字符，比如<code>Ǒ</code>（\u01D1）。另一种是提供合成符号（combining character），即原字符与重音符号的合成，两个字符合成一个字符，比如<code>O</code>（\u004F）和<code>ˇ</code>（\u030C）合成<code>Ǒ</code>（\u004F\u030C）。</p>
+<p>这两种表示方法，在视觉和语义上都等价，但是JavaScript不能识别。</p>
+<pre><code class="lang-javascript">&#39;\u01D1&#39;===&#39;\u004F\u030C&#39; //false
+
+&#39;\u01D1&#39;.length // 1
+&#39;\u004F\u030C&#39;.length // 2
+</code></pre>
+<p>上面代码表示，JavaScript将合成字符视为两个字符，导致两种表示方法不相等。</p>
+<p>ES6提供字符串实例的<code>normalize()</code>方法，用来将字符的不同表示方法统一为同样的形式，这称为Unicode正规化。</p>
+<pre><code class="lang-javascript">&#39;\u01D1&#39;.normalize() === &#39;\u004F\u030C&#39;.normalize()
+// true
+</code></pre>
+<p><code>normalize</code>方法可以接受四个参数。</p>
+<ul>
+<li><code>NFC</code>，默认参数，表示“标准等价合成”（Normalization Form Canonical Composition），返回多个简单字符的合成字符。所谓“标准等价”指的是视觉和语义上的等价。</li>
+<li><code>NFD</code>，表示“标准等价分解”（Normalization Form Canonical Decomposition），即在标准等价的前提下，返回合成字符分解的多个简单字符。</li>
+<li><code>NFKC</code>，表示“兼容等价合成”（Normalization Form Compatibility Composition），返回合成字符。所谓“兼容等价”指的是语义上存在等价，但视觉上不等价，比如“囍”和“喜喜”。（这只是用来举例，<code>normalize</code>方法不能识别中文。）</li>
+<li><code>NFKD</code>，表示“兼容等价分解”（Normalization Form Compatibility Decomposition），即在兼容等价的前提下，返回合成字符分解的多个简单字符。</li>
+</ul>
+<pre><code class="lang-javascript">&#39;\u004F\u030C&#39;.normalize(&#39;NFC&#39;).length // 1
+&#39;\u004F\u030C&#39;.normalize(&#39;NFD&#39;).length // 2
+</code></pre>
+<p>上面代码表示，<code>NFC</code>参数返回字符的合成形式，<code>NFD</code>参数返回字符的分解形式。</p>
+<p>不过，<code>normalize</code>方法目前不能识别三个或三个以上字符的合成。这种情况下，还是只能使用正则表达式，通过Unicode编号区间判断。</p>
+<h2 id="includes-startswith-endswith-">includes(), startsWith(), endsWith()</h2>
+<p>传统上，JavaScript只有<code>indexOf</code>方法，可以用来确定一个字符串是否包含在另一个字符串中。ES6又提供了三种新方法。</p>
+<ul>
+<li><strong>includes()</strong>：返回布尔值，表示是否找到了参数字符串。</li>
+<li><strong>startsWith()</strong>：返回布尔值，表示参数字符串是否在源字符串的头部。</li>
+<li><strong>endsWith()</strong>：返回布尔值，表示参数字符串是否在源字符串的尾部。</li>
+</ul>
+<pre><code class="lang-javascript">var s = &#39;Hello world!&#39;;
+
+s.startsWith(&#39;Hello&#39;) // true
+s.endsWith(&#39;!&#39;) // true
+s.includes(&#39;o&#39;) // true
+</code></pre>
+<p>这三个方法都支持第二个参数，表示开始搜索的位置。</p>
+<pre><code class="lang-javascript">var s = &#39;Hello world!&#39;;
+
+s.startsWith(&#39;world&#39;, 6) // true
+s.endsWith(&#39;Hello&#39;, 5) // true
+s.includes(&#39;Hello&#39;, 6) // false
+</code></pre>
+<p>上面代码表示，使用第二个参数<code>n</code>时，<code>endsWith</code>的行为与其他两个方法有所不同。它针对前<code>n</code>个字符，而其他两个方法针对从第<code>n</code>个位置直到字符串结束。</p>
+<h2 id="repeat-">repeat()</h2>
+<p><code>repeat</code>方法返回一个新字符串，表示将原字符串重复<code>n</code>次。</p>
+<pre><code class="lang-javascript">&#39;x&#39;.repeat(3) // &quot;xxx&quot;
+&#39;hello&#39;.repeat(2) // &quot;hellohello&quot;
+&#39;na&#39;.repeat(0) // &quot;&quot;
+</code></pre>
+<p>参数如果是小数，会被取整。</p>
+<pre><code class="lang-javascript">&#39;na&#39;.repeat(2.9) // &quot;nana&quot;
+</code></pre>
+<p>如果<code>repeat</code>的参数是负数或者<code>Infinity</code>，会报错。</p>
+<pre><code class="lang-javascript">&#39;na&#39;.repeat(Infinity)
+// RangeError
+&#39;na&#39;.repeat(-1)
+// RangeError
+</code></pre>
+<p>但是，如果参数是0到-1之间的小数，则等同于0，这是因为会先进行取整运算。0到-1之间的小数，取整以后等于<code>-0</code>，<code>repeat</code>视同为0。</p>
+<pre><code class="lang-javascript">&#39;na&#39;.repeat(-0.9) // &quot;&quot;
+</code></pre>
+<p>参数<code>NaN</code>等同于0。</p>
+<pre><code class="lang-javascript">&#39;na&#39;.repeat(NaN) // &quot;&quot;
+</code></pre>
+<p>如果<code>repeat</code>的参数是字符串，则会先转换成数字。</p>
+<pre><code class="lang-javascript">&#39;na&#39;.repeat(&#39;na&#39;) // &quot;&quot;
+&#39;na&#39;.repeat(&#39;3&#39;) // &quot;nanana&quot;
+</code></pre>
+<h2 id="padstart-padend-">padStart()，padEnd()</h2>
+<p>ES7推出了字符串补全长度的功能。如果某个字符串不够指定长度，会在头部或尾部补全。<code>padStart</code>用于头部补全，<code>padEnd</code>用于尾部补全。</p>
+<pre><code class="lang-javascript">&#39;x&#39;.padStart(5, &#39;ab&#39;) // &#39;ababx&#39;
+&#39;x&#39;.padStart(4, &#39;ab&#39;) // &#39;abax&#39;
+
+&#39;x&#39;.padEnd(5, &#39;ab&#39;) // &#39;xabab&#39;
+&#39;x&#39;.padEnd(4, &#39;ab&#39;) // &#39;xaba&#39;
+</code></pre>
+<p>上面代码中，<code>padStart</code>和<code>padEnd</code>一共接受两个参数，第一个参数用来指定字符串的最小长度，第二个参数是用来补全的字符串。</p>
+<p>如果原字符串的长度，等于或大于指定的最小长度，则返回原字符串。</p>
+<pre><code class="lang-javascript">&#39;xxx&#39;.padStart(2, &#39;ab&#39;) // &#39;xxx&#39;
+&#39;xxx&#39;.padEnd(2, &#39;ab&#39;) // &#39;xxx&#39;
+</code></pre>
+<p>如果省略第二个参数，则会用空格补全长度。</p>
+<pre><code class="lang-javascript">&#39;x&#39;.padStart(4) // &#39;   x&#39;
+&#39;x&#39;.padEnd(4) // &#39;x   &#39;
+</code></pre>
+<h2 id="-">模板字符串</h2>
+<p>传统的JavaScript语言，输出模板通常是这样写的。</p>
+<pre><code class="lang-javascript">$(&quot;#result&quot;).append(
+  &quot;There are &lt;b&gt;&quot; + basket.count + &quot;&lt;/b&gt; &quot; +
+  &quot;items in your basket, &quot; +
+  &quot;&lt;em&gt;&quot; + basket.onSale +
+  &quot;&lt;/em&gt; are on sale!&quot;
+);
+</code></pre>
+<p>上面这种写法相当繁琐不方便，ES6引入了模板字符串解决这个问题。</p>
+<pre><code class="lang-javascript">$(&quot;#result&quot;).append(`
+  There are &lt;b&gt;${basket.count}&lt;/b&gt; items
+   in your basket, &lt;em&gt;${basket.onSale}&lt;/em&gt;
+  are on sale!
+`);
+</code></pre>
+<p>模板字符串（template string）是增强版的字符串，用反引号（&#96;）标识。它可以当作普通字符串使用，也可以用来定义多行字符串，或者在字符串中嵌入变量。</p>
+<pre><code class="lang-javascript">// 普通字符串
+`In JavaScript &#39;\n&#39; is a line-feed.`
+
+// 多行字符串
+`In JavaScript this is
+ not legal.`
+
+console.log(`string text line 1
+string text line 2`);
+
+// 字符串中嵌入变量
+var name = &quot;Bob&quot;, time = &quot;today&quot;;
+`Hello ${name}, how are you ${time}?`
+</code></pre>
+<p>上面代码中的字符串，都是用反引号表示。如果在模板字符串中需要使用反引号，则前面要用反斜杠转义。</p>
+<pre><code class="lang-javascript">var greeting = `\`Yo\` World!`;
+</code></pre>
+<p>如果使用模板字符串表示多行字符串，所有的空格和缩进都会被保留在输出之中。</p>
+<pre><code class="lang-javascript">$(&quot;#warning&quot;).html(`
+  &lt;h1&gt;Watch out!&lt;/h1&gt;
+  &lt;p&gt;Unauthorized hockeying can result in penalties
+  of up to ${maxPenalty} minutes.&lt;/p&gt;
+`);
+</code></pre>
+<p>模板字符串中嵌入变量，需要将变量名写在<code>${}</code>之中。</p>
+<pre><code class="lang-javascript">function authorize(user, action) {
+  if (!user.hasPrivilege(action)) {
+    throw new Error(
+      // 传统写法为
+      // &#39;User &#39;
+      // + user.name
+      // + &#39; is not authorized to do &#39;
+      // + action
+      // + &#39;.&#39;
+      `User ${user.name} is not authorized to do ${action}.`);
+  }
+}
+</code></pre>
+<p>大括号内部可以放入任意的JavaScript表达式，可以进行运算，以及引用对象属性。</p>
+<pre><code class="lang-javascript">var x = 1;
+var y = 2;
+
+`${x} + ${y} = ${x + y}`
+// &quot;1 + 2 = 3&quot;
+
+`${x} + ${y * 2} = ${x + y * 2}`
+// &quot;1 + 4 = 5&quot;
+
+var obj = {x: 1, y: 2};
+`${obj.x + obj.y}`
+// 3
+</code></pre>
+<p>模板字符串之中还能调用函数。</p>
+<pre><code class="lang-javascript">function fn() {
+  return &quot;Hello World&quot;;
+}
+
+`foo ${fn()} bar`
+// foo Hello World bar
+</code></pre>
+<p>如果大括号中的值不是字符串，将按照一般的规则转为字符串。比如，大括号中是一个对象，将默认调用对象的<code>toString</code>方法。</p>
+<p>如果模板字符串中的变量没有声明，将报错。</p>
+<pre><code class="lang-javascript">// 变量place没有声明
+var msg = `Hello, ${place}`;
+// 报错
+</code></pre>
+<p>由于模板字符串的大括号内部，就是执行JavaScript代码，因此如果大括号内部是一个字符串，将会原样输出。</p>
+<pre><code class="lang-javascript">`Hello ${&#39;World&#39;}`
+// &quot;Hello World&quot;
+</code></pre>
+<p>如果需要引用模板字符串本身，可以像下面这样写。</p>
+<pre><code class="lang-javascript">// 写法一
+let str = &#39;return &#39; + &#39;`Hello ${name}!`&#39;;
+let func = new Function(&#39;name&#39;, str);
+func(&#39;Jack&#39;) // &quot;Hello Jack!&quot;
+
+// 写法二
+let str = &#39;(name) =&gt; `Hello ${name}!`&#39;;
+let func = eval.call(null, str);
+func(&#39;Jack&#39;) // &quot;Hello Jack!&quot;
+</code></pre>
+<h2 id="-">实例：模板编译</h2>
+<p>下面，我们来看一个通过模板字符串，生成正式模板的实例。</p>
+<pre><code class="lang-javascript">var template = `
+&lt;ul&gt;
+  &lt;% for(var i=0; i &lt; data.supplies.length; i++) {%&gt;
+    &lt;li&gt;&lt;%= data.supplies[i] %&gt;&lt;/li&gt;
+  &lt;% } %&gt;
+&lt;/ul&gt;
+`;
+</code></pre>
+<p>上面代码在模板字符串之中，放置了一个常规模板。该模板使用<code>&lt;%...%&gt;</code>放置JavaScript代码，使用<code>&lt;%= ... %&gt;</code>输出JavaScript表达式。</p>
+<p>怎么编译这个模板字符串呢？</p>
+<p>一种思路是将其转换为JavaScript表达式字符串。</p>
+<pre><code class="lang-javascript">echo(&#39;&lt;ul&gt;&#39;);
+for(var i=0; i &lt; data.supplies.length; i++) {
+  echo(&#39;&lt;li&gt;&#39;);
+  echo(data.supplies[i]);
+  echo(&#39;&lt;/li&gt;&#39;);
+};
+echo(&#39;&lt;/ul&gt;&#39;);
+</code></pre>
+<p>这个转换使用正则表达式就行了。</p>
+<pre><code class="lang-javascript">var evalExpr = /&lt;%=(.+?)%&gt;/g;
+var expr = /&lt;%([\s\S]+?)%&gt;/g;
+
+template = template
+  .replace(evalExpr, &#39;`); \n  echo( $1 ); \n  echo(`&#39;)
+  .replace(expr, &#39;`); \n $1 \n  echo(`&#39;);
+
+template = &#39;echo(`&#39; + template + &#39;`);&#39;;
+</code></pre>
+<p>然后，将<code>template</code>封装在一个函数里面返回，就可以了。</p>
+<pre><code class="lang-javascript">var script =
+`(function parse(data){
+  var output = &quot;&quot;;
+
+  function echo(html){
+    output += html;
+  }
+
+  ${ template }
+
+  return output;
+})`;
+
+return script;
+</code></pre>
+<p>将上面的内容拼装成一个模板编译函数<code>compile</code>。</p>
+<pre><code class="lang-javascript">function compile(template){
+  var evalExpr = /&lt;%=(.+?)%&gt;/g;
+  var expr = /&lt;%([\s\S]+?)%&gt;/g;
+
+  template = template
+    .replace(evalExpr, &#39;`); \n  echo( $1 ); \n  echo(`&#39;)
+    .replace(expr, &#39;`); \n $1 \n  echo(`&#39;);
+
+  template = &#39;echo(`&#39; + template + &#39;`);&#39;;
+
+  var script =
+  `(function parse(data){
+    var output = &quot;&quot;;
+
+    function echo(html){
+      output += html;
+    }
+
+    ${ template }
+
+    return output;
+  })`;
+
+  return script;
+}
+</code></pre>
+<p><code>compile</code>函数的用法如下。</p>
+<pre><code class="lang-javascript">var parse = eval(compile(template));
+div.innerHTML = parse({ supplies: [ &quot;broom&quot;, &quot;mop&quot;, &quot;cleaner&quot; ] });
+//   &lt;ul&gt;
+//     &lt;li&gt;broom&lt;/li&gt;
+//     &lt;li&gt;mop&lt;/li&gt;
+//     &lt;li&gt;cleaner&lt;/li&gt;
+//   &lt;/ul&gt;
+</code></pre>
+<h2 id="-">标签模板</h2>
+<p>模板字符串的功能，不仅仅是上面这些。它可以紧跟在一个函数名后面，该函数将被调用来处理这个模板字符串。这被称为“标签模板”功能（tagged template）。</p>
+<p>标签模板其实不是模板，而是函数调用的一种特殊形式。“标签”指的就是函数，紧跟在后面的模板字符串就是它的参数。</p>
+<pre><code class="lang-javascript">var a = 5;
+var b = 10;
+
+tag`Hello ${ a + b } world ${ a * b }`;
+</code></pre>
+<p>上面代码中，模板字符串前面有一个标识名<code>tag</code>，它是一个函数。整个表达式的返回值，就是<code>tag</code>函数处理模板字符串后的返回值。</p>
+<p>函数<code>tag</code>依次会接收到多个参数。</p>
+<pre><code class="lang-javascript">function tag(stringArr, value1, value2){
+  // ...
+}
+
+// 等同于
+
+function tag(stringArr, ...values){
+  // ...
+}
+</code></pre>
+<p><code>tag</code>函数的第一个参数是一个数组，该数组的成员是模板字符串中那些没有变量替换的部分，也就是说，变量替换只发生在数组的第一个成员与第二个成员之间、第二个成员与第三个成员之间，以此类推。</p>
+<p><code>tag</code>函数的其他参数，都是模板字符串各个变量被替换后的值。由于本例中，模板字符串含有两个变量，因此<code>tag</code>会接受到<code>value1</code>和<code>value2</code>两个参数。</p>
+<p><code>tag</code>函数所有参数的实际值如下。</p>
+<ul>
+<li>第一个参数：<code>[&#39;Hello &#39;, &#39; world &#39;, &#39;&#39;]</code></li>
+<li>第二个参数: 15</li>
+<li>第三个参数：50</li>
+</ul>
+<p>也就是说，<code>tag</code>数实际上以下面的形式调用。</p>
+<pre><code class="lang-javascript">tag([&#39;Hello &#39;, &#39; world &#39;, &#39;&#39;], 15, 50)
+</code></pre>
+<p>我们可以按照需要编写<code>tag</code>函数的代码。下面是<code>tag</code>函数的一种写法，以及运行结果。</p>
+<pre><code class="lang-javascript">var a = 5;
+var b = 10;
+
+function tag(s, v1, v2) {
+  console.log(s[0]);
+  console.log(s[1]);
+  console.log(s[2]);
+  console.log(v1);
+  console.log(v2);
+
+  return &quot;OK&quot;;
+}
+
+tag`Hello ${ a + b } world ${ a * b}`;
+// &quot;Hello &quot;
+// &quot; world &quot;
+// &quot;&quot;
+// 15
+// 50
+// &quot;OK&quot;
+</code></pre>
+<p>下面是一个更复杂的例子。</p>
+<pre><code class="lang-javascript">var total = 30;
+var msg = passthru`The total is ${total} (${total*1.05} with tax)`;
+
+function passthru(literals) {
+  var result = &quot;&quot;;
+  var i = 0;
+
+  while (i &lt; literals.length) {
+    result += literals[i++];
+    if (i &lt; arguments.length) {
+      result += arguments[i];
+    }
+  }
+
+  return result;
+}
+
+msg // &quot;The total is 30 (31.5 with tax)&quot;
+</code></pre>
+<p>上面这个例子展示了，如何将各个参数按照原来的位置拼合回去。</p>
+<p><code>passthru</code>函数采用rest参数的写法如下。</p>
+<pre><code class="lang-javascript">function passthru(literals, ...values) {
+  var output = &quot;&quot;;
+  for (var index = 0; index &lt; values.length; index++) {
+    output += literals[index] + values[index];
+  }
+
+  output += literals[index]
+  return output;
+}
+</code></pre>
+<p>“标签模板”的一个重要应用，就是过滤HTML字符串，防止用户输入恶意内容。</p>
+<pre><code class="lang-javascript">var message =
+  SaferHTML`&lt;p&gt;${sender} has sent you a message.&lt;/p&gt;`;
+
+function SaferHTML(templateData) {
+  var s = templateData[0];
+  for (var i = 1; i &lt; arguments.length; i++) {
+    var arg = String(arguments[i]);
+
+    // Escape special characters in the substitution.
+    s += arg.replace(/&amp;/g, &quot;&amp;amp;&quot;)
+            .replace(/&lt;/g, &quot;&amp;lt;&quot;)
+            .replace(/&gt;/g, &quot;&amp;gt;&quot;);
+
+    // Don&#39;t escape special characters in the template.
+    s += templateData[i];
+  }
+  return s;
+}
+</code></pre>
+<p>上面代码中，经过<code>SaferHTML</code>函数处理，HTML字符串的特殊字符都会被转义。</p>
+<p>标签模板的另一个应用，就是多语言转换（国际化处理）。</p>
+<pre><code class="lang-javascript">i18n`Welcome to ${siteName}, you are visitor number ${visitorNumber}!`
+// &quot;欢迎访问xxx，您是第xxxx位访问者！&quot;
+</code></pre>
+<p>模板字符串本身并不能取代Mustache之类的模板库，因为没有条件判断和循环处理功能，但是通过标签函数，你可以自己添加这些功能。</p>
+<pre><code class="lang-javascript">// 下面的hashTemplate函数
+// 是一个自定义的模板处理函数
+var libraryHtml = hashTemplate`
+  &lt;ul&gt;
+    #for book in ${myBooks}
+      &lt;li&gt;&lt;i&gt;#{book.title}&lt;/i&gt; by #{book.author}&lt;/li&gt;
+    #end
+  &lt;/ul&gt;
+`;
+</code></pre>
+<p>除此之外，你甚至可以使用标签模板，在JavaScript语言之中嵌入其他语言。</p>
+<pre><code class="lang-javascript">jsx`
+  &lt;div&gt;
+    &lt;input
+      ref=&#39;input&#39;
+      onChange=&#39;${this.handleChange}&#39;
+      defaultValue=&#39;${this.state.value}&#39; /&gt;
+      ${this.state.value}
+   &lt;/div&gt;
+`
+</code></pre>
+<p>上面的代码通过<code>jsx</code>函数，将一个DOM字符串转为React对象。你可以在Github找到<code>jsx</code>函数的<a href="https://gist.github.com/lygaret/a68220defa69174bdec5">具体实现</a>。</p>
+<p>下面则是一个假想的例子，通过<code>java</code>函数，在JavaScript代码之中运行Java代码。</p>
+<pre><code class="lang-javascript">java`
+class HelloWorldApp {
+  public static void main(String[] args) {
+    System.out.println(“Hello World!”); // Display the string.
+  }
+}
+`
+HelloWorldApp.main();
+</code></pre>
+<p>模板处理函数的第一个参数（模板字符串数组），还有一个<code>raw</code>属性。</p>
+<pre><code class="lang-javascript">tag`First line\nSecond line`
+
+function tag(strings) {
+  console.log(strings.raw[0]);
+  // &quot;First line\\nSecond line&quot;
+}
+</code></pre>
+<p>上面代码中，<code>tag</code>函数的第一个参数<code>strings</code>，有一个<code>raw</code>属性，也指向一个数组。该数组的成员与<code>strings</code>数组完全一致。比如，<code>strings</code>数组是<code>[&quot;First line\nSecond line&quot;]</code>，那么<code>strings.raw</code>数组就是<code>[&quot;First line\\nSecond line&quot;]</code>。两者唯一的区别，就是字符串里面的斜杠都被转义了。比如，strings.raw数组会将<code>\n</code>视为<code>\</code>和<code>n</code>两个字符，而不是换行符。这是为了方便取得转义之前的原始模板而设计的。</p>
+<h2 id="string-raw-">String.raw()</h2>
+<p>ES6还为原生的String对象，提供了一个<code>raw</code>方法。</p>
+<p><code>String.raw</code>方法，往往用来充当模板字符串的处理函数，返回一个斜杠都被转义（即斜杠前面再加一个斜杠）的字符串，对应于替换变量后的模板字符串。</p>
+<pre><code class="lang-javascript">String.raw`Hi\n${2+3}!`;
+// &quot;Hi\\n5!&quot;
+
+String.raw`Hi\u000A!`;
+// &#39;Hi\\u000A!&#39;
+</code></pre>
+<p>如果原字符串的斜杠已经转义，那么<code>String.raw</code>不会做任何处理。</p>
+<pre><code class="lang-javascript">String.raw`Hi\\n`
+// &quot;Hi\\n&quot;
+</code></pre>
+<p><code>String.raw</code>的代码基本如下。</p>
+<pre><code class="lang-javascript">String.raw = function (strings, ...values) {
+  var output = &quot;&quot;;
+  for (var index = 0; index &lt; values.length; index++) {
+    output += strings.raw[index] + values[index];
+  }
+
+  output += strings.raw[index]
+  return output;
+}
+</code></pre>
+<p><code>String.raw</code>方法可以作为处理模板字符串的基本方法，它会将所有变量替换，而且对斜杠进行转义，方便下一步作为字符串来使用。</p>
+<p><code>String.raw</code>方法也可以作为正常的函数使用。这时，它的第一个参数，应该是一个具有<code>raw</code>属性的对象，且<code>raw</code>属性的值应该是一个数组。</p>
+<pre><code class="lang-javascript">String.raw({ raw: &#39;test&#39; }, 0, 1, 2);
+// &#39;t0e1s2t&#39;
+
+// 等同于
+String.raw({ raw: [&#39;t&#39;,&#39;e&#39;,&#39;s&#39;,&#39;t&#39;] }, 0, 1, 2);
+</code></pre>
+
+		</article>
+	</div>
+</div>
+
+    <footer id="footer">
+        <i id="upToTop"></i>
+        <p>
+            <span>作者-阮一峰：<a href="http://es6.ruanyifeng.com/">http://es6.ruanyifeng.com/</a></span>|联系方式 <span>|</span> <a href="javascript:void(0);">yangxiaofuPL@163.com</a>
+        </p>
+    </footer>
+    <script src="/public/js/jquery-2.1.4.min.js"></script>
+    <script src="/public/js/highlight.min.js"></script>
+    <script src="/public/js/codepretty.js"></script>
+</body>
+
+</html>

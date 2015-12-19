@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>
+        
+	函数的扩展
+
+    </title>
+    <link rel="shortcut icon" href="/public/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="/public/css/public.css">
+    <link rel="stylesheet" href="/public/css/page.css">
+    <link rel="stylesheet" href="/public/css/monokai.min.css">
+</head>
+
+<body>
+    <div id="headerWrapper" class="cf">
+        <header id="header" class="cf">
+            <div id="logo">
+                <h1 class="logo">
+					<a href="/"> 
+	Learn ECMAScript6 the easy way
+</a>
+				</h1>
+            </div>
+        </header>
+    </div>
+    
+<div id="pageWrapper">
+	<div id="mainContent">
+		<article class="post">
+			<h1 id="-">函数的扩展</h1>
+<h2 id="-">函数参数的默认值</h2>
+<h3 id="-">基本用法</h3>
+<p>在ES6之前，不能直接为函数的参数指定默认值，只能采用变通的方法。</p>
+<pre><code class="lang-javascript">function log(x, y) {
+  y = y || &#39;World&#39;;
+  console.log(x, y);
+}
+
+log(&#39;Hello&#39;) // Hello World
+log(&#39;Hello&#39;, &#39;China&#39;) // Hello China
+log(&#39;Hello&#39;, &#39;&#39;) // Hello World
+</code></pre>
+<p>上面代码检查函数<code>log</code>的参数<code>y</code>有没有赋值，如果没有，则指定默认值为<code>World</code>。这种写法的缺点在于，如果参数<code>y</code>赋值了，但是对应的布尔值为<code>false</code>，则该赋值不起作用。就像上面代码的最后一行，参数<code>y</code>等于空字符，结果被改为默认值。</p>
+<p>为了避免这个问题，通常需要先判断一下参数y是否被赋值，如果没有，再等于默认值。这有两种写法。</p>
+<pre><code class="lang-javascript">// 写法一
+if (typeof y === &#39;undefined&#39;) {
+  y = &#39;World&#39;;
+}
+
+// 写法二
+if (arguments.length === 1) {
+  y = &#39;World&#39;;
+}
+</code></pre>
+<p>ES6允许为函数的参数设置默认值，即直接写在参数定义的后面。</p>
+<pre><code class="lang-javascript">function log(x, y = &#39;World&#39;) {
+  console.log(x, y);
+}
+
+log(&#39;Hello&#39;) // Hello World
+log(&#39;Hello&#39;, &#39;China&#39;) // Hello China
+log(&#39;Hello&#39;, &#39;&#39;) // Hello
+</code></pre>
+<p>可以看到，ES6的写法比ES5简洁许多，而且非常自然。下面是另一个例子。</p>
+<pre><code class="lang-javascript">function Point(x = 0, y = 0) {
+  this.x = x;
+  this.y = y;
+}
+
+var p = new Point();
+p // { x: 0, y: 0 }
+</code></pre>
+<p>除了简洁，ES6的写法还有两个好处：首先，阅读代码的人，可以立刻意识到哪些参数是可以省略的，不用查看函数体或文档；其次，有利于将来的代码优化，即使未来的版本彻底拿掉这个参数，也不会导致以前的代码无法运行。</p>
+<p>参数变量是默认声明的，所以不能用let或const再次声明。</p>
+<pre><code class="lang-javascript">function foo(x = 5) {
+  let x = 1; // error
+  const x = 2; // error
+}
+</code></pre>
+<p>上面代码中，参数变量<code>x</code>是默认声明的，在函数体中，不能用let或const再次声明，否则会报错。</p>
+<h3 id="-">与解构赋值默认值结合使用</h3>
+<p>参数默认值可以与解构赋值的默认值，结合起来使用。</p>
+<pre><code class="lang-javascript">function foo({x, y = 5}) {
+  console.log(x, y);
+}
+
+foo({}) // undefined, 5
+foo({x: 1}) // 1, 5
+foo({x: 1, y: 2}) // 1, 2
+foo() // TypeError: Cannot read property &#39;x&#39; of undefined
+</code></pre>
+<p>上面代码使用了对象的解构赋值默认值，而没有使用函数参数的默认值。只有当函数<code>foo</code>的参数是一个对象时，变量<code>x</code>和<code>y</code>才会通过解构赋值而生成。如果函数<code>foo</code>调用时参数不是对象，变量<code>x</code>和<code>y</code>就不会生成，从而报错。如果参数对象没有<code>y</code>属性，<code>y</code>的默认值5才会生效。</p>
+<p>下面是另一个对象的解构赋值默认值的例子。</p>
+<pre><code class="lang-javascript">function fetch(url, { body = &#39;&#39;, method = &#39;GET&#39;, headers = {} }){
+  console.log(method);
+}
+
+fetch(&#39;http://example.com&#39;, {})
+// &quot;GET&quot;
+
+fetch(&#39;http://example.com&#39;)
+// 报错
+</code></pre>
+<p>上面代码中，如果函数<code>fetch</code>的第二个参数是一个对象，就可以为它的三个属性设置默认值。</p>
+<p>上面的写法不能省略第二个参数，如果结合函数参数的默认值，就可以省略第二个参数。这时，就出现了双重默认值。</p>
+<pre><code class="lang-javascript">function fetch(url, { method = &#39;GET&#39; } = {}){
+  console.log(method);
+}
+
+fetch(&#39;http://example.com&#39;)
+// &quot;GET&quot;
+</code></pre>
+<p>上面代码中，函数<code>fetch</code>没有第二个参数时，函数参数的默认值就会生效，然后才是解构赋值的默认值生效，变量<code>method</code>才会取到默认值<code>GET</code>。</p>
+<p>再请问下面两种写法有什么差别？</p>
+<pre><code class="lang-javascript">// 写法一
+function m1({x = 0, y = 0} = {}) {
+  return [x, y];
+}
+
+// 写法二
+function m2({x, y} = { x: 0, y: 0 }) {
+  return [x, y];
+}
+</code></pre>
+<p>上面两种写法都对函数的参数设定了默认值，区别是写法一函数参数的默认值是空对象，但是设置了对象解构赋值的默认值；写法二函数参数的默认值是一个有具体属性的函数，但是没有设置对象解构赋值的默认值。</p>
+<pre><code class="lang-javascript">// 函数没有参数的情况
+m1() // [0, 0]
+m2() // [0, 0]
+
+// x和y都有值的情况
+m1({x: 3, y: 8}) // [3, 8]
+m2({x: 3, y: 8}) // [3, 8]
+
+// x有值，y无值的情况
+m1({x: 3}) // [3, 0]
+m2({x: 3}) // [3, undefined]
+
+// x和y都无值的情况
+m1({}) // [0, 0];
+m2({}) // [undefined, undefined]
+
+m1({z: 3}) // [0, 0]
+m2({z: 3}) // [undefined, undefined]
+</code></pre>
+<h3 id="-">参数默认值的位置</h3>
+<p>通常情况下，定义了默认值的参数，应该是函数的尾参数。因为这样比较容易看出来，到底省略了哪些参数。如果非尾部的参数设置默认值，实际上这个参数是没法省略的。</p>
+<pre><code class="lang-javascript">// 例一
+function f(x = 1, y) {
+  return [x, y];
+}
+
+f() // [1, undefined]
+f(2) // [2, undefined])
+f(, 1) // 报错
+f(undefined, 1) // [1, 1]
+
+// 例二
+function f(x, y = 5, z) {
+  return [x, y, z];
+}
+
+f() // [undefined, 5, undefined]
+f(1) // [1, 5, undefined]
+f(1, ,2) // 报错
+f(1, undefined, 2) // [1, 5, 2]
+</code></pre>
+<p>上面代码中，有默认值的参数都不是尾参数。这时，无法只省略该参数，而不省略它后面的参数，除非显式输入<code>undefined</code>。</p>
+<p>如果传入<code>undefined</code>，将触发该参数等于默认值，<code>null</code>则没有这个效果。</p>
+<pre><code class="lang-javascript">function foo(x = 5, y = 6){
+  console.log(x,y);
+}
+
+foo(undefined, null)
+// 5 null
+</code></pre>
+<p>上面代码中，<code>x</code>参数对应<code>undefined</code>，结果触发了默认值，<code>y</code>参数等于<code>null</code>，就没有触发默认值。</p>
+<h3 id="-length-">函数的length属性</h3>
+<p>指定了默认值以后，函数的<code>length</code>属性，将返回没有指定默认值的参数个数。也就是说，指定了默认值后，<code>length</code>属性将失真。</p>
+<pre><code class="lang-javascript">(function(a){}).length // 1
+(function(a = 5){}).length // 0
+(function(a, b, c = 5){}).length // 2
+</code></pre>
+<p>上面代码中，<code>length</code>属性的返回值，等于函数的参数个数减去指定了默认值的参数个数。比如，上面最后一个函数，定义了3个参数，其中有一个参数<code>c</code>指定了默认值，因此<code>length</code>属性等于3减去1，最后得到2。</p>
+<p>这是因为<code>length</code>属性的含义是，该函数预期传入的参数个数。某个参数指定默认值以后，预期传入的参数个数就不包括这个参数了。同理，rest参数也不会计入<code>length</code>属性。</p>
+<pre><code class="lang-javascript">(function(...args) {}).length // 0
+</code></pre>
+<h3 id="-">作用域</h3>
+<p>一个需要注意的地方是，如果参数默认值是一个变量，则该变量所处的作用域，与其他变量的作用域规则是一样的，即先是当前函数的作用域，然后才是全局作用域。</p>
+<pre><code class="lang-javascript">var x = 1;
+
+function f(x, y = x) {
+  console.log(y);
+}
+
+f(2) // 2
+</code></pre>
+<p>上面代码中，参数<code>y</code>的默认值等于<code>x</code>。调用时，由于函数作用域内部的变量<code>x</code>已经生成，所以<code>y</code>等于参数<code>x</code>，而不是全局变量<code>x</code>。</p>
+<p>如果调用时，函数作用域内部的变量<code>x</code>没有生成，结果就会不一样。</p>
+<pre><code class="lang-javascript">let x = 1;
+
+function f(y = x) {
+  let x = 2;
+  console.log(y);
+}
+
+f() // 1
+</code></pre>
+<p>上面代码中，函数调用时，<code>y</code>的默认值变量<code>x</code>尚未在函数内部生成，所以<code>x</code>指向全局变量，结果又不一样。</p>
+<p>如果此时，全局变量<code>x</code>不存在，就会报错。</p>
+<pre><code class="lang-javascript">function f(y = x) {
+  let x = 2;
+  console.log(y);
+}
+
+f() // ReferenceError: x is not defined
+</code></pre>
+<p>如果函数<code>A</code>的参数默认值是函数<code>B</code>，由于函数的作用域是其声明时所在的作用域，那么函数<code>B</code>的作用域不是函数<code>A</code>，而是全局作用域。请看下面的例子。</p>
+<pre><code class="lang-javascript">let foo = &#39;outer&#39;;
+
+function bar(func = x =&gt; foo) {
+  let foo = &#39;inner&#39;;
+  console.log(func()); // outer
+}
+
+bar();
+</code></pre>
+<p>上面代码中，函数<code>bar</code>的参数<code>func</code>，默认是一个匿名函数，返回值为变量<code>foo</code>。这个匿名函数的作用域就不是<code>bar</code>。这个匿名函数声明时，是处在外层作用域，所以内部的<code>foo</code>指向函数体外的声明，输出<code>outer</code>。它实际上等同于下面的代码。</p>
+<pre><code class="lang-javascript">let foo = &#39;outer&#39;;
+let f = x =&gt; foo;
+
+function bar(func = f) {
+  let foo = &#39;inner&#39;;
+  console.log(func()); // outer
+}
+
+bar();
+</code></pre>
+<p>如果写成下面这样，就会报错。</p>
+<pre><code class="lang-javascript">function bar(func = () =&gt; foo) {
+  let foo = &#39;inner&#39;;
+  console.log(func());
+}
+
+bar() // ReferenceError: foo is not defined
+</code></pre>
+<h3 id="-">应用</h3>
+<p>利用参数默认值，可以指定某一个参数不得省略，如果省略就抛出一个错误。</p>
+<pre><code class="lang-javascript">function throwIfMissing() {
+  throw new Error(&#39;Missing parameter&#39;);
+}
+
+function foo(mustBeProvided = throwIfMissing()) {
+  return mustBeProvided;
+}
+
+foo()
+// Error: Missing parameter
+</code></pre>
+<p>上面代码的<code>foo</code>函数，如果调用的时候没有参数，就会调用默认值<code>throwIfMissing</code>函数，从而抛出一个错误。</p>
+<p>从上面代码还可以看到，参数<code>mustBeProvided</code>的默认值等于<code>throwIfMissing</code>函数的运行结果（即函数名之后有一对圆括号），这表明参数的默认值不是在定义时执行，而是在运行时执行（即如果参数已经赋值，默认值中的函数就不会运行），这与python语言不一样。</p>
+<p>另外，可以将参数默认值设为<code>undefined</code>，表明这个参数是可以省略的。</p>
+<pre><code class="lang-javascript">function foo(optional = undefined) { ··· }
+</code></pre>
+<h2 id="rest-">rest参数</h2>
+<p>ES6引入rest参数（形式为“...变量名”），用于获取函数的多余参数，这样就不需要使用arguments对象了。rest参数搭配的变量是一个数组，该变量将多余的参数放入数组中。</p>
+<pre><code class="lang-javascript">function add(...values) {
+  let sum = 0;
+
+  for (var val of values) {
+    sum += val;
+  }
+
+  return sum;
+}
+
+add(2, 5, 3) // 10
+</code></pre>
+<p>上面代码的add函数是一个求和函数，利用rest参数，可以向该函数传入任意数目的参数。</p>
+<p>下面是一个rest参数代替arguments变量的例子。</p>
+<pre><code class="lang-javascript">// arguments变量的写法
+const sortNumbers = () =&gt;
+  Array.prototype.slice.call(arguments).sort();
+
+// rest参数的写法
+const sortNumbers = (...numbers) =&gt; numbers.sort();
+</code></pre>
+<p>上面代码的两种写法，比较后可以发现，rest参数的写法更自然也更简洁。</p>
+<p>rest参数中的变量代表一个数组，所以数组特有的方法都可以用于这个变量。下面是一个利用rest参数改写数组push方法的例子。</p>
+<pre><code class="lang-javascript">function push(array, ...items) {
+  items.forEach(function(item) {
+    array.push(item);
+    console.log(item);
+  });
+}
+
+var a = [];
+push(a, 1, 2, 3)
+</code></pre>
+<p>注意，rest参数之后不能再有其他参数（即只能是最后一个参数），否则会报错。</p>
+<pre><code class="lang-javascript">// 报错
+function f(a, ...b, c) {
+  // ...
+}
+</code></pre>
+<p>函数的length属性，不包括rest参数。</p>
+<pre><code class="lang-javascript">(function(a) {}).length  // 1
+(function(...a) {}).length  // 0
+(function(a, ...b) {}).length  // 1
+</code></pre>
+<h2 id="-">扩展运算符</h2>
+<h3 id="-">含义</h3>
+<p>扩展运算符（spread）是三个点（...）。它好比rest参数的逆运算，将一个数组转为用逗号分隔的参数序列。</p>
+<pre><code class="lang-javascript">console.log(...[1, 2, 3])
+// 1 2 3
+
+console.log(1, ...[2, 3, 4], 5)
+// 1 2 3 4 5
+
+[...document.querySelectorAll(&#39;div&#39;)]
+// [&lt;div&gt;, &lt;div&gt;, &lt;div&gt;]
+</code></pre>
+<p>该运算符主要用于函数调用。</p>
+<pre><code class="lang-javascript">function push(array, ...items) {
+  array.push(...items);
+}
+
+function add(x, y) {
+  return x + y;
+}
+
+var numbers = [4, 38];
+add(...numbers) // 42
+</code></pre>
+<p>上面代码中，<code>array.push(...items)</code>和<code>add(...numbers)</code>这两行，都是函数的调用，它们的都使用了扩展运算符。该运算符将一个数组，变为参数序列。</p>
+<p>扩展运算符与正常的函数参数可以结合使用，非常灵活。</p>
+<pre><code class="lang-javascript">function f(v, w, x, y, z) { }
+var args = [0, 1];
+f(-1, ...args, 2, ...[3]);
+</code></pre>
+<h3 id="-apply-">替代数组的apply方法</h3>
+<p>由于扩展运算符可以展开数组，所以不再需要<code>apply</code>方法，将数组转为函数的参数了。</p>
+<pre><code class="lang-javascript">// ES5的写法
+function f(x, y, z) {}
+var args = [0, 1, 2];
+f.apply(null, args);
+
+// ES6的写法
+function f(x, y, z) {}
+var args = [0, 1, 2];
+f(...args);
+</code></pre>
+<p>下面是扩展运算符取代<code>apply</code>方法的一个实际的例子，应用<code>Math.max</code>方法，简化求出一个数组最大元素的写法。</p>
+<pre><code class="lang-javascript">// ES5的写法
+Math.max.apply(null, [14, 3, 77])
+
+// ES6的写法
+Math.max(...[14, 3, 77])
+
+// 等同于
+Math.max(14, 3, 77);
+</code></pre>
+<p>上面代码表示，由于JavaScript不提供求数组最大元素的函数，所以只能套用<code>Math.max</code>函数，将数组转为一个参数序列，然后求最大值。有了扩展运算符以后，就可以直接用<code>Math.max</code>了。</p>
+<p>另一个例子是通过<code>push</code>函数，将一个数组添加到另一个数组的尾部。</p>
+<pre><code class="lang-javascript">// ES5的写法
+var arr1 = [0, 1, 2];
+var arr2 = [3, 4, 5];
+Array.prototype.push.apply(arr1, arr2);
+
+// ES6的写法
+var arr1 = [0, 1, 2];
+var arr2 = [3, 4, 5];
+arr1.push(...arr2);
+</code></pre>
+<p>上面代码的ES5写法中，<code>push</code>方法的参数不能是数组，所以只好通过<code>apply</code>方法变通使用<code>push</code>方法。有了扩展运算符，就可以直接将数组传入<code>push</code>方法。</p>
+<p>下面是另外一个例子。</p>
+<pre><code class="lang-javascript">// ES5
+new (Date.bind.apply(Date, [null, 2015, 1, 1]))
+// ES6
+new Date(...[2015, 1, 1]);
+</code></pre>
+<h3 id="-">扩展运算符的应用</h3>
+<p><strong>（1）合并数组</strong></p>
+<p>扩展运算符提供了数组合并的新写法。</p>
+<pre><code class="lang-javascript">// ES5
+[1, 2].concat(more)
+// ES6
+[1, 2, ...more]
+
+var arr1 = [&#39;a&#39;, &#39;b&#39;];
+var arr2 = [&#39;c&#39;];
+var arr3 = [&#39;d&#39;, &#39;e&#39;];
+
+// ES5的合并数组
+arr1.concat(arr2, arr3));
+// [ &#39;a&#39;, &#39;b&#39;, &#39;c&#39;, &#39;d&#39;, &#39;e&#39; ]
+
+// ES6的合并数组
+[...arr1, ...arr2, ...arr3]
+// [ &#39;a&#39;, &#39;b&#39;, &#39;c&#39;, &#39;d&#39;, &#39;e&#39; ]
+</code></pre>
+<p><strong>（2）与解构赋值结合</strong></p>
+<p>扩展运算符可以与解构赋值结合起来，用于生成数组。</p>
+<pre><code class="lang-javascript">// ES5
+a = list[0], rest = list.slice(1)
+// ES6
+[a, ...rest] = list
+</code></pre>
+<p>下面是另外一些例子。</p>
+<pre><code class="lang-javascript">const [first, ...rest] = [1, 2, 3, 4, 5];
+first // 1
+rest  // [2, 3, 4, 5]
+
+const [first, ...rest] = [];
+first // undefined
+rest  // []:
+
+const [first, ...rest] = [&quot;foo&quot;];
+first  // &quot;foo&quot;
+rest   // []
+</code></pre>
+<p>如果将扩展运算符用于数组赋值，只能放在参数的最后一位，否则会报错。</p>
+<pre><code class="lang-javascript">const [...butLast, last] = [1, 2, 3, 4, 5];
+// 报错
+
+const [first, ...middle, last] = [1, 2, 3, 4, 5];
+// 报错
+</code></pre>
+<p><strong>（3）函数的返回值</strong></p>
+<p>JavaScript的函数只能返回一个值，如果需要返回多个值，只能返回数组或对象。扩展运算符提供了解决这个问题的一种变通方法。</p>
+<pre><code class="lang-javascript">var dateFields = readDateFields(database);
+var d = new Date(...dateFields);
+</code></pre>
+<p>上面代码从数据库取出一行数据，通过扩展运算符，直接将其传入构造函数<code>Date</code>。</p>
+<p><strong>（4）字符串</strong></p>
+<p>扩展运算符还可以将字符串转为真正的数组。</p>
+<pre><code class="lang-javascript">[...&quot;hello&quot;]
+// [ &quot;h&quot;, &quot;e&quot;, &quot;l&quot;, &quot;l&quot;, &quot;o&quot; ]
+</code></pre>
+<p>上面的写法，有一个重要的好处，那就是能够正确识别32位的Unicode字符。</p>
+<pre><code class="lang-javascript">&#39;x\uD83D\uDE80y&#39;.length // 4
+[...&#39;x\uD83D\uDE80y&#39;].length // 3
+</code></pre>
+<p>上面代码的第一种写法，JavaScript会将32位Unicode字符，识别为2个字符，采用扩展运算符就没有这个问题。因此，正确返回字符串长度的函数，可以像下面这样写。</p>
+<pre><code class="lang-javascript">function length(str) {
+  return [...str].length;
+}
+
+length(&#39;x\uD83D\uDE80y&#39;) // 3
+</code></pre>
+<p>凡是涉及到操作32位Unicode字符的函数，都有这个问题。因此，最好都用扩展运算符改写。</p>
+<pre><code class="lang-javascript">let str = &#39;x\uD83D\uDE80y&#39;;
+
+str.split(&#39;&#39;).reverse().join(&#39;&#39;)
+// &#39;y\uDE80\uD83Dx&#39;
+
+[...str].reverse().join(&#39;&#39;)
+// &#39;y\uD83D\uDE80x&#39;
+</code></pre>
+<p>上面代码中，如果不用扩展运算符，字符串的<code>reverse</code>操作就不正确。</p>
+<p><strong>（5）类似数组的对象</strong></p>
+<p>任何类似数组的对象，都可以用扩展运算符转为真正的数组。</p>
+<pre><code class="lang-javascript">var nodeList = document.querySelectorAll(&#39;div&#39;);
+var array = [...nodeList];
+</code></pre>
+<p>上面代码中，<code>querySelectorAll</code>方法返回的是一个<code>nodeList</code>对象，扩展运算符可以将其转为真正的数组。</p>
+<p><strong>（6）Map和Set结构，Generator函数</strong></p>
+<p>扩展运算符内部调用的是数据结构的Iterator接口，因此只要具有Iterator接口的对象，都可以使用扩展运算符，比如Map结构。</p>
+<pre><code class="lang-javascript">let map = new Map([
+  [1, &#39;one&#39;],
+  [2, &#39;two&#39;],
+  [3, &#39;three&#39;],
+]);
+
+let arr = [...map.keys()]; // [1, 2, 3]
+</code></pre>
+<p>Generator函数运行后，返回一个遍历器对象，因此也可以使用扩展运算符。</p>
+<pre><code class="lang-javascript">var go = function*(){
+  yield 1;
+  yield 2;
+  yield 3;
+};
+
+[...go()] // [1, 2, 3]
+</code></pre>
+<p>上面代码中，变量<code>go</code>是一个Generator函数，执行后返回的是一个遍历器对象，对这个遍历器对象执行扩展运算符，就会将内部遍历得到的值，转为一个数组。</p>
+<p>如果对没有<code>iterator</code>接口的对象，使用扩展运算符，将会报错。</p>
+<pre><code class="lang-javascript">var obj = {a: 1, b: 2};
+let arr = [...obj]; // TypeError: Cannot spread non-iterable object
+</code></pre>
+<h2 id="name-">name属性</h2>
+<p>函数的<code>name</code>属性，返回该函数的函数名。</p>
+<pre><code class="lang-javascript">function foo() {}
+foo.name // &quot;foo&quot;
+</code></pre>
+<p>这个属性早就被浏览器广泛支持，但是直到ES6，才将其写入了标准。</p>
+<p>需要注意的是，ES6对这个属性的行为做出了一些修改。如果将一个匿名函数赋值给一个变量，ES5的<code>name</code>属性，会返回空字符串，而ES6的<code>name</code>属性会返回实际的函数名。</p>
+<pre><code class="lang-javascript">var func1 = function () {};
+
+// ES5
+func1.name // &quot;&quot;
+
+// ES6
+func1.name // &quot;func1&quot;
+</code></pre>
+<p>上面代码中，变量<code>func1</code>等于一个匿名函数，ES5和ES6的<code>name</code>属性返回的值不一样。</p>
+<p>如果将一个具名函数赋值给一个变量，则ES5和ES6的<code>name</code>属性都返回这个具名函数原本的名字。</p>
+<pre><code class="lang-javascript">const bar = function baz() {};
+
+// ES5
+bar.name // &quot;baz&quot;
+
+// ES6
+bar.name // &quot;baz&quot;
+</code></pre>
+<p><code>Function</code>构造函数返回的函数实例，<code>name</code>属性的值为“anonymous”。</p>
+<pre><code class="lang-javascript">(new Function).name // &quot;anonymous&quot;
+</code></pre>
+<p><code>bind</code>返回的函数，<code>name</code>属性值会加上“bound ”前缀。</p>
+<pre><code class="lang-javascript">function foo() {};
+foo.bind({}).name // &quot;bound foo&quot;
+
+(function(){}).bind({}).name // &quot;bound &quot;
+</code></pre>
+<h2 id="-">箭头函数</h2>
+<h3 id="-">基本用法</h3>
+<p>ES6允许使用“箭头”（=&gt;）定义函数。</p>
+<pre><code class="lang-javascript">var f = v =&gt; v;
+</code></pre>
+<p>上面的箭头函数等同于：</p>
+<pre><code class="lang-javascript">var f = function(v) {
+  return v;
+};
+</code></pre>
+<p>如果箭头函数不需要参数或需要多个参数，就使用一个圆括号代表参数部分。</p>
+<pre><code class="lang-javascript">var f = () =&gt; 5;
+// 等同于
+var f = function (){ return 5 };
+
+var sum = (num1, num2) =&gt; num1 + num2;
+// 等同于
+var sum = function(num1, num2) {
+  return num1 + num2;
+};
+</code></pre>
+<p>如果箭头函数的代码块部分多于一条语句，就要使用大括号将它们括起来，并且使用return语句返回。</p>
+<pre><code class="lang-javascript">var sum = (num1, num2) =&gt; { return num1 + num2; }
+</code></pre>
+<p>由于大括号被解释为代码块，所以如果箭头函数直接返回一个对象，必须在对象外面加上括号。</p>
+<pre><code class="lang-javascript">var getTempItem = id =&gt; ({ id: id, name: &quot;Temp&quot; });
+</code></pre>
+<p>箭头函数可以与变量解构结合使用。</p>
+<pre><code class="lang-javascript">const full = ({ first, last }) =&gt; first + &#39; &#39; + last;
+
+// 等同于
+function full( person ){
+  return person.first + &#39; &#39; + person.name;
+}
+</code></pre>
+<p>箭头函数使得表达更加简洁。</p>
+<pre><code class="lang-javascript">const isEven = n =&gt; n % 2 == 0;
+const square = n =&gt; n * n;
+</code></pre>
+<p>上面代码只用了两行，就定义了两个简单的工具函数。如果不用箭头函数，可能就要占用多行，而且还不如现在这样写醒目。</p>
+<p>箭头函数的一个用处是简化回调函数。</p>
+<pre><code class="lang-javascript">// 正常函数写法
+[1,2,3].map(function (x) {
+  return x * x;
+});
+
+// 箭头函数写法
+[1,2,3].map(x =&gt; x * x);
+</code></pre>
+<p>另一个例子是</p>
+<pre><code class="lang-javascript">// 正常函数写法
+var result = values.sort(function(a, b) {
+  return a - b;
+});
+
+// 箭头函数写法
+var result = values.sort((a, b) =&gt; a - b);
+</code></pre>
+<p>下面是rest参数与箭头函数结合的例子。</p>
+<pre><code class="lang-javascript">const numbers = (...nums) =&gt; nums;
+
+numbers(1, 2, 3, 4, 5)
+// [1,2,3,4,5]
+
+const headAndTail = (head, ...tail) =&gt; [head, tail];
+
+headAndTail(1, 2, 3, 4, 5)
+// [1,[2,3,4,5]]
+</code></pre>
+<h3 id="-">使用注意点</h3>
+<p>箭头函数有几个使用注意点。</p>
+<p>（1）函数体内的<code>this</code>对象，就是定义时所在的对象，而不是使用时所在的对象。</p>
+<p>（2）不可以当作构造函数，也就是说，不可以使用<code>new</code>命令，否则会抛出一个错误。</p>
+<p>（3）不可以使用<code>arguments</code>对象，该对象在函数体内不存在。如果要用，可以用Rest参数代替。</p>
+<p>（4）不可以使用<code>yield</code>命令，因此箭头函数不能用作Generator函数。</p>
+<p>上面四点中，第一点尤其值得注意。<code>this</code>对象的指向是可变的，但是在箭头函数中，它是固定的。</p>
+<pre><code class="lang-javascript">function foo() {
+   setTimeout( () =&gt; {
+      console.log(&quot;id:&quot;, this.id);
+   },100);
+}
+
+foo.call( { id: 42 } );
+// id: 42
+</code></pre>
+<p>上面代码中，<code>setTimeout</code>的参数是一个箭头函数，100毫秒后执行。如果是普通函数，执行时<code>this</code>应该指向全局对象，但是箭头函数导致<code>this</code>总是指向函数所在的对象。</p>
+<p>下面是另一个例子。</p>
+<pre><code class="lang-javascript">var handler = {
+  id: &quot;123456&quot;,
+
+  init: function() {
+    document.addEventListener(&quot;click&quot;,
+      event =&gt; this.doSomething(event.type), false);
+  },
+
+  doSomething: function(type) {
+    console.log(&quot;Handling &quot; + type  + &quot; for &quot; + this.id);
+  }
+};
+</code></pre>
+<p>上面代码的<code>init</code>方法中，使用了箭头函数，这导致<code>this</code>总是指向<code>handler</code>对象。否则，回调函数运行时，<code>this.doSomething</code>这一行会报错，因为此时<code>this</code>指向全局对象。</p>
+<pre><code class="lang-javascript">function Timer () {
+  this.seconds = 0
+  setInterval(() =&gt; this.seconds++, 1000)
+}
+var timer = new Timer()
+setTimeout(() =&gt; console.log(timer.seconds), 3100)
+// 3
+</code></pre>
+<p>上面代码中，<code>Timer</code>函数内部的<code>setInterval</code>调用了<code>this.seconds</code>属性，通过箭头函数让<code>this</code>总是指向Timer的实例对象。否则，输出结果是0，而不是3。</p>
+<p><code>this</code>指向的固定化，并不是因为箭头函数内部有绑定<code>this</code>的机制，实际原因是箭头函数根本没有自己的<code>this</code>，导致内部的<code>this</code>就是外层代码块的<code>this</code>。正是因为它没有<code>this</code>，所以也就不能用作构造函数。</p>
+<p>请问下面的代码之中有几个<code>this</code>？</p>
+<pre><code class="lang-javascript">function foo() {
+   return () =&gt; {
+      return () =&gt; {
+         return () =&gt; {
+            console.log(&quot;id:&quot;, this.id);
+         };
+      };
+   };
+}
+
+foo.call( { id: 42 } )()()();
+// id: 42
+</code></pre>
+<p>上面代码之中，只有一个<code>this</code>，就是函数<code>foo</code>的<code>this</code>。因为所有的内层函数都是箭头函数，都没有自己的<code>this</code>，所以它们的<code>this</code>其实都是最外层<code>foo</code>函数的<code>this</code>。</p>
+<p>除了<code>this</code>，以下三个变量在箭头函数之中也是不存在的，指向外层函数的对应变量：<code>arguments</code>、<code>super</code>、<code>new.target</code>。</p>
+<pre><code class="lang-javascript">function foo() {
+   setTimeout( () =&gt; {
+      console.log(&quot;args:&quot;, arguments);
+   },100);
+}
+
+foo( 2, 4, 6, 8 );
+// args: [2, 4, 6, 8]
+</code></pre>
+<p>上面代码中，箭头函数内部的变量<code>arguments</code>，其实是函数<code>foo</code>的<code>arguments</code>变量。</p>
+<p>另外，由于箭头函数没有自己的<code>this</code>，所以当然也就不能用<code>call()</code>、<code>apply()</code>、<code>bind()</code>这些方法去改变<code>this</code>的指向。</p>
+<pre><code class="lang-javascript">(function() {
+  return [
+    (() =&gt; this.x).bind({ x: &#39;inner&#39; })()
+  ]
+}).call({ x: &#39;outer&#39; });
+// [&#39;outer&#39;]
+</code></pre>
+<p>上面代码中，箭头函数没有自己的<code>this</code>，所以<code>bind</code>方法无效，内部的<code>this</code>指向外部的<code>this</code>。</p>
+<p>长期以来，JavaScript语言的<code>this</code>对象一直是一个令人头痛的问题，在对象方法中使用<code>this</code>，必须非常小心。箭头函数”绑定”<code>this</code>，很大程度上解决了这个困扰。</p>
+<h3 id="-">嵌套的箭头函数</h3>
+<p>箭头函数内部，还可以再使用箭头函数。下面是一个ES5语法的多重嵌套函数。</p>
+<pre><code class="lang-javascript">function insert(value) {
+  return {into: function (array) {
+    return {after: function (afterValue) {
+      array.splice(array.indexOf(afterValue) + 1, 0, value);
+      return array;
+    }};
+  }};
+}
+
+insert(2).into([1, 3]).after(1); //[1, 2, 3]
+</code></pre>
+<p>上面这个函数，可以使用箭头函数改写。</p>
+<pre><code class="lang-javascript">let insert = (value) =&gt; ({into: (array) =&gt; ({after: (afterValue) =&gt; {
+  array.splice(array.indexOf(afterValue) + 1, 0, value);
+  return array;
+}})});
+
+insert(2).into([1, 3]).after(1); //[1, 2, 3]
+</code></pre>
+<p>下面是一个部署管道机制（pipeline）的例子，即前一个函数的输出是后一个函数的输入。</p>
+<pre><code class="lang-javascript">const pipeline = (...funcs) =&gt;
+  val =&gt; funcs.reduce((a, b) =&gt; b(a), val);
+
+const plus1 = a =&gt; a + 1;
+const mult2 = a =&gt; a * 2;
+const addThenMult = pipeline(plus1, mult2);
+
+addThenMult(5)
+// 12
+</code></pre>
+<p>如果觉得上面的写法可读性比较差，也可以采用下面的写法。</p>
+<pre><code class="lang-javascript">const plus1 = a =&gt; a + 1;
+const mult2 = a =&gt; a * 2;
+
+mult2(plus1(5))
+// 12
+</code></pre>
+<p>箭头函数还有一个功能，就是可以很方便地改写λ演算。</p>
+<pre><code class="lang-javascript">// λ演算的写法
+fix = λf.(λx.f(λv.x(x)(v)))(λx.f(λv.x(x)(v)))
+
+// ES6的写法
+var fix = f =&gt; (x =&gt; f(v =&gt; x(x)(v)))
+               (x =&gt; f(v =&gt; x(x)(v)));
+</code></pre>
+<p>上面两种写法，几乎是一一对应的。由于λ演算对于计算机科学非常重要，这使得我们可以用ES6作为替代工具，探索计算机科学。</p>
+<h2 id="-">函数绑定</h2>
+<p>箭头函数可以绑定<code>this</code>对象，大大减少了显式绑定<code>this</code>对象的写法（<code>call</code>、<code>apply</code>、<code>bind</code>）。但是，箭头函数并不适用于所有场合，所以ES7提出了“函数绑定”（function bind）运算符，用来取代<code>call</code>、<code>apply</code>、<code>bind</code>调用。虽然该语法还是ES7的一个<a href="https://github.com/zenparsing/es-function-bind">提案</a>，但是Babel转码器已经支持。</p>
+<p>函数绑定运算符是并排的两个双冒号（::），双冒号左边是一个对象，右边是一个函数。该运算符会自动将左边的对象，作为上下文环境（即this对象），绑定到右边的函数上面。</p>
+<pre><code class="lang-javascript">foo::bar;
+// 等同于
+bar.bind(foo);
+
+foo::bar(...arguments);
+// 等同于
+bar.apply(foo, arguments);
+
+const hasOwnProperty = Object.prototype.hasOwnProperty;
+function hasOwn(obj, key) {
+  return obj::hasOwnProperty(key);
+}
+</code></pre>
+<p>如果双冒号左边为空，右边是一个对象的方法，则等于将该方法绑定在该对象上面。</p>
+<pre><code class="lang-javascript">var method = obj::obj.foo;
+// 等同于
+var method = ::obj.foo;
+
+let log = ::console.log;
+// 等同于
+var log = console.log.bind(console);
+</code></pre>
+<p>由于双冒号运算符返回的还是原对象，因此可以采用链式写法。</p>
+<pre><code class="lang-javascript">// 例一
+import { map, takeWhile, forEach } from &quot;iterlib&quot;;
+
+getPlayers()
+::map(x =&gt; x.character())
+::takeWhile(x =&gt; x.strength &gt; 100)
+::forEach(x =&gt; console.log(x));
+
+// 例二
+let { find, html } = jake;
+
+document.querySelectorAll(&quot;div.myClass&quot;)
+::find(&quot;p&quot;)
+::html(&quot;hahaha&quot;);
+</code></pre>
+<h2 id="-">尾调用优化</h2>
+<h3 id="-">什么是尾调用？</h3>
+<p>尾调用（Tail Call）是函数式编程的一个重要概念，本身非常简单，一句话就能说清楚，就是指某个函数的最后一步是调用另一个函数。</p>
+<pre><code class="lang-javascript">function f(x){
+  return g(x);
+}
+</code></pre>
+<p>上面代码中，函数f的最后一步是调用函数g，这就叫尾调用。</p>
+<p>以下三种情况，都不属于尾调用。</p>
+<pre><code class="lang-javascript">// 情况一
+function f(x){
+  let y = g(x);
+  return y;
+}
+
+// 情况二
+function f(x){
+  return g(x) + 1;
+}
+
+// 情况三
+function f(x){
+  g(x);
+}
+</code></pre>
+<p>上面代码中，情况一是调用函数g之后，还有赋值操作，所以不属于尾调用，即使语义完全一样。情况二也属于调用后还有操作，即使写在一行内。情况三等同于下面的代码。</p>
+<pre><code class="lang-javascript">function f(x){
+  g(x);
+  return undefined;
+}
+</code></pre>
+<p>尾调用不一定出现在函数尾部，只要是最后一步操作即可。</p>
+<pre><code class="lang-javascript">function f(x) {
+  if (x &gt; 0) {
+    return m(x)
+  }
+  return n(x);
+}
+</code></pre>
+<p>上面代码中，函数m和n都属于尾调用，因为它们都是函数f的最后一步操作。</p>
+<h3 id="-">尾调用优化</h3>
+<p>尾调用之所以与其他调用不同，就在于它的特殊的调用位置。</p>
+<p>我们知道，函数调用会在内存形成一个“调用记录”，又称“调用帧”（call frame），保存调用位置和内部变量等信息。如果在函数A的内部调用函数B，那么在A的调用帧上方，还会形成一个B的调用帧。等到B运行结束，将结果返回到A，B的调用帧才会消失。如果函数B内部还调用函数C，那就还有一个C的调用帧，以此类推。所有的调用帧，就形成一个“调用栈”（call stack）。</p>
+<p>尾调用由于是函数的最后一步操作，所以不需要保留外层函数的调用帧，因为调用位置、内部变量等信息都不会再用到了，只要直接用内层函数的调用帧，取代外层函数的调用帧就可以了。</p>
+<pre><code class="lang-javascript">function f() {
+  let m = 1;
+  let n = 2;
+  return g(m + n);
+}
+f();
+
+// 等同于
+function f() {
+  return g(3);
+}
+f();
+
+// 等同于
+g(3);
+</code></pre>
+<p>上面代码中，如果函数g不是尾调用，函数f就需要保存内部变量m和n的值、g的调用位置等信息。但由于调用g之后，函数f就结束了，所以执行到最后一步，完全可以删除 f(x) 的调用帧，只保留 g(3) 的调用帧。</p>
+<p>这就叫做“尾调用优化”（Tail call optimization），即只保留内层函数的调用帧。如果所有函数都是尾调用，那么完全可以做到每次执行时，调用帧只有一项，这将大大节省内存。这就是“尾调用优化”的意义。</p>
+<p>注意，只有不再用到外层函数的内部变量，内层函数的调用帧才会取代外层函数的调用帧，否则就无法进行“尾调用优化”。</p>
+<pre><code class="lang-javascript">function addOne(a){
+  var one = 1;
+  function inner(b){
+    return b + one;
+  }
+  return inner(a);
+}
+</code></pre>
+<p>上面的函数不会进行尾调用优化，因为内层函数inner用到了，外层函数addOne的内部变量one。</p>
+<h3 id="-">尾递归</h3>
+<p>函数调用自身，称为递归。如果尾调用自身，就称为尾递归。</p>
+<p>递归非常耗费内存，因为需要同时保存成千上百个调用帧，很容易发生“栈溢出”错误（stack overflow）。但对于尾递归来说，由于只存在一个调用帧，所以永远不会发生“栈溢出”错误。</p>
+<pre><code class="lang-javascript">function factorial(n) {
+  if (n === 1) return 1;
+  return n * factorial(n - 1);
+}
+
+factorial(5) // 120
+</code></pre>
+<p>上面代码是一个阶乘函数，计算n的阶乘，最多需要保存n个调用记录，复杂度 O(n) 。</p>
+<p>如果改写成尾递归，只保留一个调用记录，复杂度 O(1) 。</p>
+<pre><code class="lang-javascript">function factorial(n, total) {
+  if (n === 1) return total;
+  return factorial(n - 1, n * total);
+}
+
+factorial(5, 1) // 120
+</code></pre>
+<p>由此可见，“尾调用优化”对递归操作意义重大，所以一些函数式编程语言将其写入了语言规格。ES6也是如此，第一次明确规定，所有ECMAScript的实现，都必须部署“尾调用优化”。这就是说，在ES6中，只要使用尾递归，就不会发生栈溢出，相对节省内存。</p>
+<p>注意，只有开启严格模式，尾调用优化才会生效。由于一旦启用尾调用优化，<code>func.arguments</code>和<code>func.caller</code>这两个函数内部对象就失去意义了，因为外层的帧会被整个替换掉，这两个对象包含的信息就会被移除。严格模式下，这两个对象也是不可用的。</p>
+<pre><code class="lang-javascript">function restricted() {
+  &quot;use strict&quot;;
+  restricted.caller;    // 报错
+  restricted.arguments; // 报错
+}
+restricted();
+</code></pre>
+<h3 id="-">递归函数的改写</h3>
+<p>尾递归的实现，往往需要改写递归函数，确保最后一步只调用自身。做到这一点的方法，就是把所有用到的内部变量改写成函数的参数。比如上面的例子，阶乘函数 factorial 需要用到一个中间变量 total ，那就把这个中间变量改写成函数的参数。这样做的缺点就是不太直观，第一眼很难看出来，为什么计算5的阶乘，需要传入两个参数5和1？</p>
+<p>两个方法可以解决这个问题。方法一是在尾递归函数之外，再提供一个正常形式的函数。</p>
+<pre><code class="lang-javascript">function tailFactorial(n, total) {
+  if (n === 1) return total;
+  return tailFactorial(n - 1, n * total);
+}
+
+function factorial(n) {
+  return tailFactorial(n, 1);
+}
+
+factorial(5) // 120
+</code></pre>
+<p>上面代码通过一个正常形式的阶乘函数 factorial ，调用尾递归函数 tailFactorial ，看起来就正常多了。</p>
+<p>函数式编程有一个概念，叫做柯里化（currying），意思是将多参数的函数转换成单参数的形式。这里也可以使用柯里化。</p>
+<pre><code class="lang-javascript">function currying(fn, n) {
+  return function (m) {
+    return fn.call(this, m, n);
+  };
+}
+
+function tailFactorial(n, total) {
+  if (n === 1) return total;
+  return tailFactorial(n - 1, n * total);
+}
+
+const factorial = currying(tailFactorial, 1);
+
+factorial(5) // 120
+</code></pre>
+<p>上面代码通过柯里化，将尾递归函数 tailFactorial 变为只接受1个参数的 factorial 。</p>
+<p>第二种方法就简单多了，就是采用ES6的函数默认值。</p>
+<pre><code class="lang-javascript">function factorial(n, total = 1) {
+  if (n === 1) return total;
+  return factorial(n - 1, n * total);
+}
+
+factorial(5) // 120
+</code></pre>
+<p>上面代码中，参数 total 有默认值1，所以调用时不用提供这个值。</p>
+<p>总结一下，递归本质上是一种循环操作。纯粹的函数式编程语言没有循环操作命令，所有的循环都用递归实现，这就是为什么尾递归对这些语言极其重要。对于其他支持“尾调用优化”的语言（比如Lua，ES6），只需要知道循环可以用递归代替，而一旦使用递归，就最好使用尾递归。</p>
+<h2 id="-">函数参数的尾逗号</h2>
+<p>ES7有一个<a href="https://github.com/jeffmo/es-trailing-function-commas">提案</a>，允许函数的最后一个参数有尾逗号（trailing comma）。</p>
+<p>目前，函数定义和调用时，都不允许有参数的尾逗号。</p>
+<pre><code class="lang-javascript">function clownsEverywhere(
+  param1,
+  param2
+) { /* ... */ }
+
+clownsEverywhere(
+  &#39;foo&#39;,
+  &#39;bar&#39;
+);
+</code></pre>
+<p>如果以后要在函数的定义之中添加参数，就势必还要添加一个逗号。这对版本管理系统来说，就会显示，添加逗号的那一行也发生了变动。这看上去有点冗余，因此新提案允许定义和调用时，尾部直接有一个逗号。</p>
+<pre><code class="lang-javascript">function clownsEverywhere(
+  param1,
+  param2,
+) { /* ... */ }
+
+clownsEverywhere(
+  &#39;foo&#39;,
+  &#39;bar&#39;,
+);
+</code></pre>
+
+		</article>
+	</div>
+</div>
+
+    <footer id="footer">
+        <i id="upToTop"></i>
+        <p>
+            <span>作者-阮一峰：<a href="http://es6.ruanyifeng.com/">http://es6.ruanyifeng.com/</a></span>|联系方式 <span>|</span> <a href="javascript:void(0);">yangxiaofuPL@163.com</a>
+        </p>
+    </footer>
+    <script src="/public/js/jquery-2.1.4.min.js"></script>
+    <script src="/public/js/highlight.min.js"></script>
+    <script src="/public/js/codepretty.js"></script>
+</body>
+
+</html>

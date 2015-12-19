@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>
+        
+	对象的扩展
+
+    </title>
+    <link rel="shortcut icon" href="/public/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="/public/css/public.css">
+    <link rel="stylesheet" href="/public/css/page.css">
+    <link rel="stylesheet" href="/public/css/monokai.min.css">
+</head>
+
+<body>
+    <div id="headerWrapper" class="cf">
+        <header id="header" class="cf">
+            <div id="logo">
+                <h1 class="logo">
+					<a href="/"> 
+	Learn ECMAScript6 the easy way
+</a>
+				</h1>
+            </div>
+        </header>
+    </div>
+    
+<div id="pageWrapper">
+	<div id="mainContent">
+		<article class="post">
+			<h1 id="-">对象的扩展</h1>
+<h2 id="-">属性的简洁表示法</h2>
+<p>ES6允许直接写入变量和函数，作为对象的属性和方法。这样的书写更加简洁。</p>
+<pre><code class="lang-javascript">var foo = &#39;bar&#39;;
+var baz = {foo};
+baz // {foo: &quot;bar&quot;}
+
+// 等同于
+var baz = {foo: foo};
+</code></pre>
+<p>上面代码表明，ES6允许在对象之中，只写属性名，不写属性值。这时，属性值等于属性名所代表的变量。下面是另一个例子。</p>
+<pre><code class="lang-javascript">function f(x, y) {
+  return {x, y};
+}
+
+// 等同于
+
+function f(x, y) {
+  return {x: x, y: y};
+}
+
+f(1, 2) // Object {x: 1, y: 2}
+</code></pre>
+<p>除了属性简写，方法也可以简写。</p>
+<pre><code class="lang-javascript">var o = {
+  method() {
+    return &quot;Hello!&quot;;
+  }
+};
+
+// 等同于
+
+var o = {
+  method: function() {
+    return &quot;Hello!&quot;;
+  }
+};
+</code></pre>
+<p>下面是一个实际的例子。</p>
+<pre><code class="lang-javascript">var Person = {
+
+  name: &#39;张三&#39;,
+
+  //等同于birth: birth
+  birth,
+
+  // 等同于hello: function ()...
+  hello() { console.log(&#39;我的名字是&#39;, this.name); }
+
+};
+</code></pre>
+<p>这种写法用于函数的返回值，将会非常方便。</p>
+<pre><code class="lang-javascript">function getPoint() {
+  var x = 1;
+  var y = 10;
+  return {x, y};
+}
+
+getPoint()
+// {x:1, y:10}
+</code></pre>
+<p>CommonJS模块输出变量，就非常合适使用简洁写法。</p>
+<pre><code class="lang-javascript">var ms = {};
+
+function getItem (key) {
+  return key in ms ? ms[key] : null;
+}
+
+function setItem (key, value) {
+  ms[key] = value;
+}
+
+function clear () {
+  ms = {};
+}
+
+module.exports = { getItem, setItem, clear };
+// 等同于
+module.exports = {
+  getItem: getItem,
+  setItem: setItem,
+  clear: clear
+};
+</code></pre>
+<p>属性的赋值器（setter）和取值器（getter），事实上也是采用这种写法。</p>
+<pre><code class="lang-javascript">var cart = {
+  _wheels: 4,
+
+  get wheels () {
+    return this._wheels;
+  },
+
+  set wheels (value) {
+    if (value &lt; this._wheels) {
+      throw new Error(&#39;数值太小了！&#39;);
+    }
+    this._wheels = value;
+  }
+}
+</code></pre>
+<p>注意，简洁写法的属性名总是字符串，这会导致一些看上去比较奇怪的结果。</p>
+<pre><code class="lang-javascript">var obj = {
+  class () {}
+};
+
+// 等同于
+
+var obj = {
+  &#39;class&#39;: function() {}
+};
+</code></pre>
+<p>上面代码中，<code>class</code>是字符串，所以不会因为它属于关键字，而导致语法解析报错。</p>
+<p>如果某个方法的值是一个Generator函数，前面需要加上星号。</p>
+<pre><code class="lang-javascript">var obj = {
+  * m(){
+    yield &#39;hello world&#39;;
+  }
+}
+</code></pre>
+<h2 id="-">属性名表达式</h2>
+<p>JavaScript语言定义对象的属性，有两种方法。</p>
+<pre><code class="lang-javascript">// 方法一
+obj.foo = true;
+
+// 方法二
+obj[&#39;a&#39; + &#39;bc&#39;] = 123;
+</code></pre>
+<p>上面代码的方法一是直接用标识符作为属性名，方法二是用表达式作为属性名，这时要将表达式放在方括号之内。</p>
+<p>但是，如果使用字面量方式定义对象（使用大括号），在ES5中只能使用方法一（标识符）定义属性。</p>
+<pre><code class="lang-javascript">var obj = {
+  foo: true,
+  abc: 123
+};
+</code></pre>
+<p>ES6允许字面量定义对象时，用方法二（表达式）作为对象的属性名，即把表达式放在方括号内。</p>
+<pre><code class="lang-javascript">let propKey = &#39;foo&#39;;
+
+let obj = {
+  [propKey]: true,
+  [&#39;a&#39; + &#39;bc&#39;]: 123
+};
+</code></pre>
+<p>下面是另一个例子。</p>
+<pre><code class="lang-javascript">var lastWord = &#39;last word&#39;;
+
+var a = {
+  &#39;first word&#39;: &#39;hello&#39;,
+  [lastWord]: &#39;world&#39;
+};
+
+a[&#39;first word&#39;] // &quot;hello&quot;
+a[lastWord] // &quot;world&quot;
+a[&#39;last word&#39;] // &quot;world&quot;
+</code></pre>
+<p>表达式还可以用于定义方法名。</p>
+<pre><code class="lang-javascript">let obj = {
+  [&#39;h&#39;+&#39;ello&#39;]() {
+    return &#39;hi&#39;;
+  }
+};
+
+obj.hello() // hi
+</code></pre>
+<p>注意，属性名表达式与简洁表示法，不能同时使用，会报错。</p>
+<pre><code class="lang-javascript">// 报错
+var foo = &#39;bar&#39;;
+var bar = &#39;abc&#39;;
+var baz = { [foo] };
+
+// 正确
+var foo = &#39;bar&#39;;
+var baz = { [foo]: &#39;abc&#39;};
+</code></pre>
+<h2 id="-name-">方法的name属性</h2>
+<p>函数的<code>name</code>属性，返回函数名。对象方法也是函数，因此也有<code>name</code>属性。</p>
+<pre><code class="lang-javascript">var person = {
+  sayName: function() {
+    console.log(this.name);
+  },
+  get firstName() {
+    return &quot;Nicholas&quot;
+  }
+}
+
+person.sayName.name   // &quot;sayName&quot;
+person.firstName.name // &quot;get firstName&quot;
+</code></pre>
+<p>上面代码中，方法的<code>name</code>属性返回函数名（即方法名）。如果使用了取值函数，则会在方法名前加上<code>get</code>。如果是存值函数，方法名的前面会加上<code>set</code>。</p>
+<p>有两种特殊情况：<code>bind</code>方法创造的函数，<code>name</code>属性返回“bound”加上原函数的名字；<code>Function</code>构造函数创造的函数，<code>name</code>属性返回“anonymous”。</p>
+<pre><code class="lang-javascript">(new Function()).name // &quot;anonymous&quot;
+
+var doSomething = function() {
+  // ...
+};
+doSomething.bind().name // &quot;bound doSomething&quot;
+</code></pre>
+<p>如果对象的方法是一个Symbol值，那么<code>name</code>属性返回的是这个Symbol值的描述。</p>
+<pre><code class="lang-javascript">const key1 = Symbol(&#39;description&#39;);
+const key2 = Symbol();
+let obj = {
+  [key1]() {},
+  [key2]() {},
+};
+obj[key1].name // &quot;[description]&quot;
+obj[key2].name // &quot;&quot;
+</code></pre>
+<p>上面代码中，<code>key1</code>对应的Symbol值有描述，<code>key2</code>没有。</p>
+<h2 id="object-is-">Object.is()</h2>
+<p><code>Object.is</code>用来比较两个值是否严格相等。它与严格比较运算符（===）的行为基本一致。</p>
+<pre><code class="lang-javascript">Object.is(&#39;foo&#39;, &#39;foo&#39;)
+// true
+Object.is({}, {})
+// false
+</code></pre>
+<p>不同之处只有两个：一是<code>+0</code>不等于<code>-0</code>，二是<code>NaN</code>等于自身。</p>
+<pre><code class="lang-javascript">+0 === -0 //true
+NaN === NaN // false
+
+Object.is(+0, -0) // false
+Object.is(NaN, NaN) // true
+</code></pre>
+<p>ES5可以通过下面的代码，部署<code>Object.is</code>。</p>
+<pre><code class="lang-javascript">Object.defineProperty(Object, &#39;is&#39;, {
+  value: function(x, y) {
+    if (x === y) {
+      // 针对+0 不等于 -0的情况
+      return x !== 0 || 1 / x === 1 / y;
+    }
+    // 针对NaN的情况
+    return x !== x &amp;&amp; y !== y;
+  },
+  configurable: true,
+  enumerable: false,
+  writable: true
+});
+</code></pre>
+<h2 id="object-assign-">Object.assign()</h2>
+<p><code>Object.assign</code>方法用来将源对象（source）的所有可枚举属性，复制到目标对象（target）。它至少需要两个对象作为参数，第一个参数是目标对象，后面的参数都是源对象。只要有一个参数不是对象，就会抛出TypeError错误。</p>
+<pre><code class="lang-javascript">var target = { a: 1 };
+
+var source1 = { b: 2 };
+var source2 = { c: 3 };
+
+Object.assign(target, source1, source2);
+target // {a:1, b:2, c:3}
+</code></pre>
+<p>注意，如果目标对象与源对象有同名属性，或多个源对象有同名属性，则后面的属性会覆盖前面的属性。</p>
+<pre><code class="lang-javascript">var target = { a: 1, b: 1 };
+
+var source1 = { b: 2, c: 2 };
+var source2 = { c: 3 };
+
+Object.assign(target, source1, source2);
+target // {a:1, b:2, c:3}
+</code></pre>
+<p><code>Object.assign</code>只拷贝自身属性，不可枚举的属性（<code>enumerable</code>为false）和继承的属性不会被拷贝。</p>
+<pre><code class="lang-javascript">Object.assign({b: &#39;c&#39;},
+  Object.defineProperty({}, &#39;invisible&#39;, {
+    enumerable: false,
+    value: &#39;hello&#39;
+  })
+)
+// { b: &#39;c&#39; }
+</code></pre>
+<p>上面代码中，<code>Object.assign</code>要拷贝的对象只有一个不可枚举属性<code>invisible</code>，这个属性并没有被拷贝进去。</p>
+<p>属性名为Symbol值的属性，也会被<code>Object.assign</code>拷贝。</p>
+<pre><code class="lang-javascript">Object.assign({ a: &#39;b&#39; }, { [Symbol(&#39;c&#39;)]: &#39;d&#39; })
+// { a: &#39;b&#39;, Symbol(c): &#39;d&#39; }
+</code></pre>
+<p>对于嵌套的对象，<code>Object.assign</code>的处理方法是替换，而不是添加。</p>
+<pre><code class="lang-javascript">var target = { a: { b: &#39;c&#39;, d: &#39;e&#39; } }
+var source = { a: { b: &#39;hello&#39; } }
+Object.assign(target, source)
+// { a: { b: &#39;hello&#39; } }
+</code></pre>
+<p>上面代码中，<code>target</code>对象的<code>a</code>属性被<code>source</code>对象的<code>a</code>属性整个替换掉了，而不会得到<code>{ a: { b: &#39;hello&#39;, d: &#39;e&#39; } }</code>的结果。这通常不是开发者想要的，需要特别小心。有一些函数库提供<code>Object.assign</code>的定制版本（比如Lodash的<code>_.defaultsDeep</code>方法），可以解决深拷贝的问题。</p>
+<p>注意，<code>Object.assign</code>可以用来处理数组，但是会把数组视为对象。</p>
+<pre><code class="lang-javascript">Object.assign([1, 2, 3], [4, 5])
+// [4, 5, 3]
+</code></pre>
+<p>上面代码中，<code>Object.assign</code>把数组视为属性名为0、1、2的对象，因此目标数组的0号属性<code>4</code>覆盖了原数组的0号属性<code>1</code>。</p>
+<p><code>Object.assign</code>方法有很多用处。</p>
+<p><strong>（1）为对象添加属性</strong></p>
+<pre><code class="lang-javascript">class Point {
+  constructor(x, y) {
+    Object.assign(this, {x, y});
+  }
+}
+</code></pre>
+<p>上面方法通过assign方法，将x属性和y属性添加到Point类的对象实例。</p>
+<p><strong>（2）为对象添加方法</strong></p>
+<pre><code class="lang-javascript">
+Object.assign(SomeClass.prototype, {
+  someMethod(arg1, arg2) {
+    ···
+  },
+  anotherMethod() {
+    ···
+  }
+});
+
+// 等同于下面的写法
+SomeClass.prototype.someMethod = function (arg1, arg2) {
+  ···
+};
+SomeClass.prototype.anotherMethod = function () {
+  ···
+};
+</code></pre>
+<p>上面代码使用了对象属性的简洁表示法，直接将两个函数放在大括号中，再使用assign方法添加到SomeClass.prototype之中。</p>
+<p><strong>（3）克隆对象</strong></p>
+<pre><code class="lang-javascript">function clone(origin) {
+  return Object.assign({}, origin);
+}
+</code></pre>
+<p>上面代码将原始对象拷贝到一个空对象，就得到了原始对象的克隆。</p>
+<p>不过，采用这种方法克隆，只能克隆原始对象自身的值，不能克隆它继承的值。如果想要保持继承链，可以采用下面的代码。</p>
+<pre><code class="lang-javascript">function clone(origin) {
+  let originProto = Object.getPrototypeOf(origin);
+  return Object.assign(Object.create(originProto), origin);
+}
+</code></pre>
+<p><strong>（4）合并多个对象</strong></p>
+<p>将多个对象合并到某个对象。</p>
+<pre><code class="lang-javascript">const merge =
+  (target, ...sources) =&gt; Object.assign(target, ...sources);
+</code></pre>
+<p>如果希望合并后返回一个新对象，可以改写上面函数，对一个空对象合并。</p>
+<pre><code class="lang-javascript">const merge =
+  (...sources) =&gt; Object.assign({}, ...sources);
+</code></pre>
+<p><strong>（5）为属性指定默认值</strong></p>
+<pre><code class="lang-javascript">const DEFAULTS = {
+  logLevel: 0,
+  outputFormat: &#39;html&#39;
+};
+
+function processContent(options) {
+  let options = Object.assign({}, DEFAULTS, options);
+}
+</code></pre>
+<p>上面代码中，<code>DEFAULTS</code>对象是默认值，<code>options</code>对象是用户提供的参数。<code>Object.assign</code>方法将<code>DEFAULTS</code>和<code>options</code>合并成一个新对象，如果两者有同名属性，则<code>option</code>的属性值会覆盖<code>DEFAULTS</code>的属性值。</p>
+<p>注意，由于存在深拷贝的问题，<code>DEFAULTS</code>对象和<code>options</code>对象的所有属性的值，都只能是简单类型，而不能指向另一个对象。否则，将导致<code>DEFAULTS</code>对象的该属性不起作用。</p>
+<h2 id="-">属性的可枚举性</h2>
+<p>对象的每个属性都有一个描述对象（Descriptor），用来控制该属性的行为。<code>Object.getOwnPropertyDescriptor</code>方法可以获取该属性的描述对象。</p>
+<pre><code class="lang-javascript">let obj = { foo: 123 };
+ Object.getOwnPropertyDescriptor(obj, &#39;foo&#39;)
+ //   { value: 123,
+ //     writable: true,
+ //     enumerable: true,
+ //     configurable: true }
+</code></pre>
+<p>描述对象的<code>enumerable</code>属性，称为”可枚举性“，如果该属性为<code>false</code>，就表示某些操作会忽略当前属性。</p>
+<p>ES5有三个操作会忽略<code>enumerable</code>为<code>false</code>的属性。</p>
+<ul>
+<li>for...in 循环：只遍历对象自身的和继承的可枚举的属性</li>
+<li>Object.keys()：返回对象自身的所有可枚举的属性的键名</li>
+<li>JSON.stringify()：只串行化对象自身的可枚举的属性</li>
+</ul>
+<p>ES6新增了两个操作，会忽略<code>enumerable</code>为<code>false</code>的属性。</p>
+<ul>
+<li>Object.assign()：只拷贝对象自身的可枚举的属性</li>
+<li>Reflect.enumerate()：返回所有<code>for...in</code>循环会遍历的属性</li>
+</ul>
+<p>这五个操作之中，只有<code>for...in</code>和<code>Reflect.enumerate()</code>会返回继承的属性。实际上，引入<code>enumerable</code>的最初目的，就是让某些属性可以规避掉<code>for...in</code>操作。比如，对象原型的<code>toString</code>方法，以及数组的<code>length</code>属性，就通过这种手段，不会被<code>for...in</code>遍历到。</p>
+<pre><code class="lang-javascript">Object.getOwnPropertyDescriptor(Object.prototype, &#39;toString&#39;).enumerable
+// false
+
+Object.getOwnPropertyDescriptor([], &#39;length&#39;).enumerable
+// false
+</code></pre>
+<p>另外，ES6规定，所有Class的原型的方法都是不可枚举的。</p>
+<pre><code class="lang-javascript">Object.getOwnPropertyDescriptor(class {foo() {}}.prototype, &#39;foo&#39;).enumerable
+// false
+</code></pre>
+<p>总的来说，操作中引入继承的属性会让问题复杂化，大多数时候，我们只关心对象自身的属性。所以，尽量不要用<code>for...in</code>循环，而用<code>Object.keys()</code>代替。</p>
+<h2 id="-">属性的遍历</h2>
+<p>ES6一共有6种方法可以遍历对象的属性。</p>
+<p><strong>（1）for...in</strong></p>
+<p><code>for...in</code>循环遍历对象自身的和继承的可枚举属性（不含Symbol属性）。</p>
+<p><strong>（2）Object.keys(obj)</strong></p>
+<p><code>Object.keys</code>返回一个数组，包括对象自身的（不含继承的）所有可枚举属性（不含Symbol属性）。</p>
+<p><strong>（3）Object.getOwnPropertyNames(obj)</strong></p>
+<p><code>Object.getOwnPropertyNames</code>返回一个数组，包含对象自身的所有属性（不含Symbol属性，但是包括不可枚举属性）。</p>
+<p><strong>（4）Object.getOwnPropertySymbols(obj)</strong></p>
+<p><code>Object.getOwnPropertySymbols</code>返回一个数组，包含对象自身的所有Symbol属性。</p>
+<p><strong>（5）Reflect.ownKeys(obj)</strong></p>
+<p><code>Reflect.ownKeys</code>返回一个数组，包含对象自身的所有属性，不管是属性名是Symbol或字符串，也不管是否可枚举。</p>
+<p><strong>（6）Reflect.enumerate(obj)</strong></p>
+<p><code>Reflect.enumerate</code>返回一个Iterator对象，遍历对象自身的和继承的所有可枚举属性（不含Symbol属性），与<code>for...in</code>循环相同。</p>
+<p>以上的6种方法遍历对象的属性，都遵守同样的属性遍历的次序规则。</p>
+<ul>
+<li>首先遍历所有属性名为数值的属性，按照数字排序。</li>
+<li>其次遍历所有属性名为字符串的属性，按照生成时间排序。</li>
+<li>最后遍历所有属性名为Symbol值的属性，按照生成时间排序。</li>
+</ul>
+<pre><code class="lang-javascript">Reflect.ownKeys({ [Symbol()]:0, b:0, 10:0, 2:0, a:0 })
+// [&#39;2&#39;, &#39;10&#39;, &#39;b&#39;, &#39;a&#39;, Symbol()]
+</code></pre>
+<p>上面代码中，<code>Reflect.ownKeys</code>方法返回一个数组，包含了参数对象的所有属性。这个数组的属性次序是这样的，首先是数值属性<code>2</code>和<code>10</code>，其次是字符串属性<code>b</code>和<code>a</code>，最后是Symbol属性。</p>
+<h2 id="-__proto__-object-setprototypeof-object-getprototypeof-"><code>__proto__</code>属性，Object.setPrototypeOf()，Object.getPrototypeOf()</h2>
+<p><strong>（1）<code>__proto__</code>属性</strong></p>
+<p><code>__proto__</code>属性（前后各两个下划线），用来读取或设置当前对象的<code>prototype</code>对象。目前，所有浏览器（包括IE11）都部署了这个属性。</p>
+<pre><code class="lang-javascript">// es6的写法
+var obj = {
+  method: function() { ... }
+}
+obj.__proto__ = someOtherObj;
+
+// es5的写法
+var obj = Object.create(someOtherObj);
+obj.method = function() { ... }
+</code></pre>
+<p>该属性没有写入ES6的正文，而是写入了附录，原因是<code>__proto__</code>前后的双下划线，说明它本质上是一个内部属性，而不是一个正式的对外的API，只是由于浏览器广泛支持，才被加入了ES6。标准明确规定，只有浏览器必须部署这个属性，其他运行环境不一定需要部署，而且新的代码最好认为这个属性是不存在的。因此，无论从语义的角度，还是从兼容性的角度，都不要使用这个属性，而是使用下面的<code>Object.setPrototypeOf()</code>（写操作）、<code>Object.getPrototypeOf()</code>（读操作）、<code>Object.create()</code>（生成操作）代替。</p>
+<p>在实现上，<code>__proto__</code>调用的是<code>Object.prototype.__proto__</code>，具体实现如下。</p>
+<pre><code class="lang-javascript">Object.defineProperty(Object.prototype, &#39;__proto__&#39;, {
+  get() {
+    let _thisObj = Object(this);
+    return Object.getPrototypeOf(_thisObj);
+  },
+  set(proto) {
+    if (this === undefined || this === null) {
+      throw new TypeError();
+    }
+    if (!isObject(this)) {
+      return undefined;
+    }
+    if (!isObject(proto)) {
+      return undefined;
+    }
+    let status = Reflect.setPrototypeOf(this, proto);
+    if (! status) {
+      throw new TypeError();
+    }
+  },
+});
+function isObject(value) {
+  return Object(value) === value;
+}
+</code></pre>
+<p>如果一个对象本身部署了<code>__proto__</code>属性，则该属性的值就是对象的原型。</p>
+<pre><code class="lang-javascript">Object.getPrototypeOf({ __proto__: null })
+// null
+</code></pre>
+<p><strong>（2）Object.setPrototypeOf()</strong></p>
+<p><code>Object.setPrototypeOf</code>方法的作用与<code>__proto__</code>相同，用来设置一个对象的<code>prototype</code>对象。它是ES6正式推荐的设置原型对象的方法。</p>
+<pre><code class="lang-javascript">// 格式
+Object.setPrototypeOf(object, prototype)
+
+// 用法
+var o = Object.setPrototypeOf({}, null);
+</code></pre>
+<p>该方法等同于下面的函数。</p>
+<pre><code class="lang-javascript">function (obj, proto) {
+  obj.__proto__ = proto;
+  return obj;
+}
+</code></pre>
+<p>下面是一个例子。</p>
+<pre><code class="lang-javascript">let proto = {};
+let obj = { x: 10 };
+Object.setPrototypeOf(obj, proto);
+
+proto.y = 20;
+proto.z = 40;
+
+obj.x // 10
+obj.y // 20
+obj.z // 40
+</code></pre>
+<p>上面代码将proto对象设为obj对象的原型，所以从obj对象可以读取proto对象的属性。</p>
+<p><strong>（3）Object.getPrototypeOf()</strong></p>
+<p>该方法与setPrototypeOf方法配套，用于读取一个对象的prototype对象。</p>
+<pre><code class="lang-javascript">Object.getPrototypeOf(obj);
+</code></pre>
+<p>下面是一个例子。</p>
+<pre><code class="lang-javascript">function Rectangle() {
+}
+
+var rec = new Rectangle();
+
+Object.getPrototypeOf(rec) === Rectangle.prototype
+// true
+
+Object.setPrototypeOf(rec, Object.prototype);
+Object.getPrototypeOf(rec) === Rectangle.prototype
+// false
+</code></pre>
+<h2 id="-">对象的扩展运算符</h2>
+<p>目前，ES7有一个<a href="https://github.com/sebmarkbage/ecmascript-rest-spread">提案</a>，将rest参数/扩展运算符（...）引入对象。Babel转码器已经支持这项功能。</p>
+<p><strong>（1）Rest参数</strong></p>
+<p>Rest参数用于从一个对象取值，相当于将所有可遍历的、但尚未被读取的属性，分配到指定的对象上面。所有的键和它们的值，都会拷贝到新对象上面。</p>
+<pre><code class="lang-javascript">let { x, y, ...z } = { x: 1, y: 2, a: 3, b: 4 };
+x // 1
+y // 2
+z // { a: 3, b: 4 }
+</code></pre>
+<p>上面代码中，变量z是Rest参数所在的对象。它获取等号右边的所有尚未读取的键（a和b），将它们和它们的值拷贝过来。</p>
+<p>注意，Rest参数的拷贝是浅拷贝，即如果一个键的值是复合类型的值（数组、对象、函数）、那么Rest参数拷贝的是这个值的引用，而不是这个值的副本。</p>
+<pre><code class="lang-javascript">let obj = { a: { b: 1 } };
+let { ...x } = obj;
+obj.a.b = 2;
+x.a.b // 2
+</code></pre>
+<p>上面代码中，x是Rest参数，拷贝了对象obj的a属性。a属性引用了一个对象，修改这个对象的值，会影响到Rest参数对它的引用。</p>
+<p>另外，Rest参数不会拷贝继承自原型对象的属性。</p>
+<pre><code class="lang-javascript">let o1 = { a: 1 };
+let o2 = { b: 2 };
+o2.__proto__ = o1;
+let o3 = { ...o2 };
+o3 // { b: 2 }
+</code></pre>
+<p>上面代码中，对象o3是o2的复制，但是只复制了o2自身的属性，没有复制它的原型对象o1的属性。</p>
+<p><strong>（2）扩展运算符</strong></p>
+<p>扩展运算符用于取出参数对象的所有可遍历属性，拷贝到当前对象之中。</p>
+<pre><code class="lang-javascript">let z = { a: 3, b: 4 };
+let n = { ...z };
+n // { a: 3, b: 4 }
+</code></pre>
+<p>这等同于使用<code>Object.assign</code>方法。</p>
+<pre><code class="lang-javascript">let aClone = { ...a };
+// 等同于
+let aClone = Object.assign({}, a);
+</code></pre>
+<p>扩展运算符可以用于合并两个对象。</p>
+<pre><code class="lang-javascript">let ab = { ...a, ...b };
+</code></pre>
+<p>扩展运算符还可以用自定义属性，会在新对象之中，覆盖掉原有参数。</p>
+<pre><code class="lang-javascript">let aWithOverrides = { ...a, x: 1, y: 2 };
+// 等同于
+let aWithOverrides = { ...a, ...{ x: 1, y: 2 } };
+// 等同于
+let x = 1, y = 2, aWithOverrides = { ...a, x, y };
+// 等同于
+let aWithOverrides = Object.assign({}, a, { x: 1, y: 2 });
+</code></pre>
+<p>上面代码中，a对象的x属性和y属性，拷贝到新对象后会被覆盖掉。</p>
+<p>如果把自定义属性放在扩展运算符前面，就变成了设置新对象的默认属性值。</p>
+<pre><code class="lang-javascript">let aWithDefaults = { x: 1, y: 2, ...a };
+// 等同于
+let aWithDefaults = Object.assign({}, { x: 1, y: 2 }, a);
+// 等同于
+let aWithDefaults = Object.assign({ x: 1, y: 2 }, a);
+</code></pre>
+<p>扩展运算符的参数对象之中，如果有取值函数<code>get</code>，这个函数是会执行的。</p>
+<pre><code class="lang-javascript">// 并不会抛出错误，因为x属性只是被定义，但没执行
+let aWithXGetter = {
+  ...a,
+  get x() {
+    throws new Error(&#39;not thrown yet&#39;);
+  }
+};
+
+// 会抛出错误，因为x属性被执行了
+let runtimeError = {
+  ...a,
+  ...{
+    get x() {
+      throws new Error(&#39;thrown now&#39;);
+    }
+  }
+};
+</code></pre>
+<p>如果扩展运算符的参数是null或undefined，这个两个值会被忽略，不会报错。</p>
+<pre><code class="lang-javascript">let emptyObject = { ...null, ...undefined }; // 不报错
+</code></pre>
+
+		</article>
+	</div>
+</div>
+
+    <footer id="footer">
+        <i id="upToTop"></i>
+        <p>
+            <span>作者-阮一峰：<a href="http://es6.ruanyifeng.com/">http://es6.ruanyifeng.com/</a></span>|联系方式 <span>|</span> <a href="javascript:void(0);">yangxiaofuPL@163.com</a>
+        </p>
+    </footer>
+    <script src="/public/js/jquery-2.1.4.min.js"></script>
+    <script src="/public/js/highlight.min.js"></script>
+    <script src="/public/js/codepretty.js"></script>
+</body>
+
+</html>

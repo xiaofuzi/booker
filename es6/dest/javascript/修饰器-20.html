@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>
+        
+	修饰器
+
+    </title>
+    <link rel="shortcut icon" href="/public/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="/public/css/public.css">
+    <link rel="stylesheet" href="/public/css/page.css">
+    <link rel="stylesheet" href="/public/css/monokai.min.css">
+</head>
+
+<body>
+    <div id="headerWrapper" class="cf">
+        <header id="header" class="cf">
+            <div id="logo">
+                <h1 class="logo">
+					<a href="/"> 
+	Learn ECMAScript6 the easy way
+</a>
+				</h1>
+            </div>
+        </header>
+    </div>
+    
+<div id="pageWrapper">
+	<div id="mainContent">
+		<article class="post">
+			<h1 id="-">修饰器</h1>
+<h2 id="-">类的修饰</h2>
+<p>修饰器（Decorator）是一个表达式，用来修改类的行为。这是ES7的一个<a href="https://github.com/wycats/javascript-decorators">提案</a>，目前Babel转码器已经支持。</p>
+<p>修饰器对类的行为的改变，是代码编译时发生的，而不是在运行时。这意味着，修饰器能在编译阶段运行代码。</p>
+<pre><code class="lang-javascript">function testable(target) {
+  target.isTestable = true;
+}
+
+@testable
+class MyTestableClass {}
+
+console.log(MyTestableClass.isTestable) // true
+</code></pre>
+<p>上面代码中，<code>@testable</code>就是一个修饰器。它修改了MyTestableClass这个类的行为，为它加上了静态属性<code>isTestable</code>。</p>
+<p>基本上，修饰器的行为就是下面这样。</p>
+<pre><code class="lang-javascript">@decorator
+class A {}
+
+// 等同于
+
+class A {}
+A = decorator(A) || A;
+</code></pre>
+<p>也就是说，修饰器本质上就是能在编译时执行的函数。</p>
+<p>修饰器函数可以接受三个参数，依次是目标函数、属性名和该属性的描述对象。后两个参数可省略。上面代码中，testable函数的参数target，就是所要修饰的对象。如果希望修饰器的行为，能够根据目标对象的不同而不同，就要在外面再封装一层函数。</p>
+<pre><code class="lang-javascript">function testable(isTestable) {
+  return function(target) {
+    target.isTestable = isTestable;
+  }
+}
+
+@testable(true)
+class MyTestableClass {}
+MyTestableClass.isTestable // true
+
+@testable(false)
+class MyClass {}
+MyClass.isTestable // false
+</code></pre>
+<p>上面代码中，修饰器<code>testable</code>可以接受参数，这就等于可以修改修饰器的行为。</p>
+<p>如果想要为类的实例添加方法，可以在修饰器函数中，为目标类的prototype属性添加方法。</p>
+<pre><code class="lang-javascript">function testable(target) {
+  target.prototype.isTestable = true;
+}
+
+@testable
+class MyTestableClass {}
+
+let obj = new MyTestableClass();
+obj.isTestable // true
+</code></pre>
+<p>上面代码中，修饰器函数<code>testable</code>是在目标类的<code>prototype</code>属性添加属性，因此就可以在类的实例上调用添加的属性。</p>
+<p>下面是另外一个例子。</p>
+<pre><code class="lang-javascript">// mixins.js
+export function mixins(...list) {
+  return function (target) {
+    Object.assign(target.prototype, ...list)
+  }
+}
+
+// main.js
+import { mixins } from &#39;./mixins&#39;
+
+const Foo = {
+  foo() { console.log(&#39;foo&#39;) }
+}
+
+@mixins(Foo)
+class MyClass {}
+
+let obj = new MyClass()
+obj.foo() // &#39;foo&#39;
+</code></pre>
+<p>上面代码通过修饰器<code>mixins</code>，可以为类添加指定的方法。</p>
+<p>修饰器可以用<code>Object.assign()</code>模拟。</p>
+<pre><code class="lang-javascript">const Foo = {
+  foo() { console.log(&#39;foo&#39;) }
+}
+
+class MyClass {}
+
+Object.assign(MyClass.prototype, Foo);
+
+let obj = new MyClass();
+obj.foo() // &#39;foo&#39;
+</code></pre>
+<h2 id="-">方法的修饰</h2>
+<p>修饰器不仅可以修饰类，还可以修饰类的属性。</p>
+<pre><code class="lang-javascript">class Person {
+  @readonly
+  name() { return `${this.first} ${this.last}` }
+}
+</code></pre>
+<p>上面代码中，修饰器readonly用来修饰”类“的name方法。</p>
+<p>此时，修饰器函数一共可以接受三个参数，第一个参数是所要修饰的目标对象，第二个参数是所要修饰的属性名，第三个参数是该属性的描述对象。</p>
+<pre><code class="lang-javascript">readonly(Person.prototype, &#39;name&#39;, descriptor);
+
+function readonly(target, name, descriptor){
+  // descriptor对象原来的值如下
+  // {
+  //   value: specifiedFunction,
+  //   enumerable: false,
+  //   configurable: true,
+  //   writable: true
+  // };
+  descriptor.writable = false;
+  return descriptor;
+}
+
+Object.defineProperty(Person.prototype, &#39;name&#39;, descriptor);
+</code></pre>
+<p>上面代码说明，修饰器（readonly）会修改属性的描述对象（descriptor），然后被修改的描述对象再用来定义属性。下面是另一个例子。</p>
+<pre><code class="lang-javascript">class Person {
+  @nonenumerable
+  get kidCount() { return this.children.length; }
+}
+
+function nonenumerable(target, name, descriptor) {
+  descriptor.enumerable = false;
+  return descriptor;
+}
+</code></pre>
+<p>修饰器有注释的作用。</p>
+<pre><code class="lang-javascript">@testable
+class Person {
+  @readonly
+  @nonenumerable
+  name() { return `${this.first} ${this.last}` }
+}
+</code></pre>
+<p>从上面代码中，我们一眼就能看出，<code>MyTestableClass</code>类是可测试的，而<code>name</code>方法是只读和不可枚举的。</p>
+<p>除了注释，修饰器还能用来类型检查。所以，对于类来说，这项功能相当有用。从长期来看，它将是JavaScript代码静态分析的重要工具。</p>
+<h2 id="-">为什么修饰器不能用于函数？</h2>
+<p>修饰器只能用于类和类的方法，不能用于函数，因为存在函数提升。</p>
+<pre><code class="lang-javascript">var counter = 0;
+
+var add = function () {
+  counter++;
+};
+
+@add
+function foo() {
+}
+</code></pre>
+<p>上面的代码，意图是执行后，counter等于1，但是实际上结果是couter等于0。因为函数提升，使得实际执行的代码是下面这样。</p>
+<pre><code class="lang-javascript">var counter;
+var add;
+
+@add
+function foo() {
+}
+
+counter = 0;
+
+add = function () {
+  counter++;
+};
+</code></pre>
+<p>下面是另一个例子。</p>
+<pre><code class="lang-javascript">var readOnly = require(&quot;some-decorator&quot;);
+
+@readOnly
+function foo() {
+}
+</code></pre>
+<p>上面代码也有问题，因为实际执行是下面这样。</p>
+<pre><code class="lang-javascript">var readOnly;
+
+@readOnly
+function foo() {
+}
+
+readOnly = require(&quot;some-decorator&quot;);
+</code></pre>
+<p>总之，由于存在函数提升，使得修饰器不能用于函数。类是不会提升的，所以就没有这方面的问题。</p>
+<h2 id="core-decorators-js">core-decorators.js</h2>
+<p><a href="https://github.com/jayphelps/core-decorators.js">core-decorators.js</a>是一个第三方模块，提供了几个常见的修饰器，通过它可以更好地理解修饰器。</p>
+<p><strong>（1）@autobind</strong></p>
+<p><code>autobind</code>修饰器使得方法中的<code>this</code>对象，绑定原始对象。</p>
+<pre><code class="lang-javascript">import { autobind } from &#39;core-decorators&#39;;
+
+class Person {
+  @autobind
+  getPerson() {
+    return this;
+  }
+}
+
+let person = new Person();
+let getPerson = person.getPerson;
+
+getPerson() === person;
+// true
+</code></pre>
+<p><strong>（2）@readonly</strong></p>
+<p><code>readonly</code>修饰器使得属性或方法不可写。</p>
+<pre><code class="lang-javascript">import { readonly } from &#39;core-decorators&#39;;
+
+class Meal {
+  @readonly
+  entree = &#39;steak&#39;;
+}
+
+var dinner = new Meal();
+dinner.entree = &#39;salmon&#39;;
+// Cannot assign to read only property &#39;entree&#39; of [object Object]
+</code></pre>
+<p><strong>（3）@override</strong></p>
+<p><code>override</code>修饰器检查子类的方法，是否正确覆盖了父类的同名方法，如果不正确会报错。</p>
+<pre><code class="lang-javascript">import { override } from &#39;core-decorators&#39;;
+
+class Parent {
+  speak(first, second) {}
+}
+
+class Child extends Parent {
+  @override
+  speak() {}
+  // SyntaxError: Child#speak() does not properly override Parent#speak(first, second)
+}
+
+// or
+
+class Child extends Parent {
+  @override
+  speaks() {}
+  // SyntaxError: No descriptor matching Child#speaks() was found on the prototype chain.
+  //
+  //   Did you mean &quot;speak&quot;?
+}
+</code></pre>
+<p><strong>（4）@deprecate (别名@deprecated)</strong></p>
+<p><code>deprecate</code>或<code>deprecated</code>修饰器在控制台显示一条警告，表示该方法将废除。</p>
+<pre><code class="lang-javascript">import { deprecate } from &#39;core-decorators&#39;;
+
+class Person {
+  @deprecate
+  facepalm() {}
+
+  @deprecate(&#39;We stopped facepalming&#39;)
+  facepalmHard() {}
+
+  @deprecate(&#39;We stopped facepalming&#39;, { url: &#39;http://knowyourmeme.com/memes/facepalm&#39; })
+  facepalmHarder() {}
+}
+
+let person = new Person();
+
+person.facepalm();
+// DEPRECATION Person#facepalm: This function will be removed in future versions.
+
+person.facepalmHard();
+// DEPRECATION Person#facepalmHard: We stopped facepalming
+
+person.facepalmHarder();
+// DEPRECATION Person#facepalmHarder: We stopped facepalming
+//
+//     See http://knowyourmeme.com/memes/facepalm for more details.
+//
+</code></pre>
+<p><strong>（5）@suppressWarnings</strong></p>
+<p><code>suppressWarnings</code>修饰器抑制<code>decorated</code>修饰器导致的<code>console.warn()</code>调用。但是，异步代码发出的调用除外。</p>
+<pre><code class="lang-javascript">import { suppressWarnings } from &#39;core-decorators&#39;;
+
+class Person {
+  @deprecated
+  facepalm() {}
+
+  @suppressWarnings
+  facepalmWithoutWarning() {
+    this.facepalm();
+  }
+}
+
+let person = new Person();
+
+person.facepalmWithoutWarning();
+// no warning is logged
+</code></pre>
+<h2 id="-">使用修饰器实现自动发布事件</h2>
+<p>我们可以使用修饰器，使得对象的方法被调用时，自动发出一个事件。</p>
+<pre><code class="lang-javascript">import postal from &quot;postal/lib/postal.lodash&quot;;
+
+export default function publish(topic, channel) {
+  return function(target, name, descriptor) {
+    const fn = descriptor.value;
+
+    descriptor.value = function() {
+      let value = fn.apply(this, arguments);
+      postal.channel(channel || target.channel || &quot;/&quot;).publish(topic, value);
+    };
+  };
+}
+</code></pre>
+<p>上面代码定义了一个名为<code>publish</code>的修饰器，它通过改写<code>descriptor.value</code>，使得原方法被调用时，会自动发出一个事件。它使用的事件“发布/订阅”库是<a href="https://github.com/postaljs/postal.js">Postal.js</a>。</p>
+<p>它的用法如下。</p>
+<pre><code class="lang-javascript">import publish from &quot;path/to/decorators/publish&quot;;
+
+class FooComponent () {
+  @publish(&quot;foo.some.message&quot;, &quot;component&quot;)
+  someMethod() {
+    return {
+      my: &quot;data&quot;
+    };
+  }
+  @publish(&quot;foo.some.other&quot;)
+  anotherMethod() {
+    // ...
+  }
+}
+</code></pre>
+<p>以后，只要调用<code>someMethod</code>或者<code>anotherMethod</code>，就会自动发出一个事件。</p>
+<pre><code class="lang-javascript">let foo = new FooComponent();
+
+foo.someMethod() // 在&quot;component&quot;频道发布&quot;foo.some.message&quot;事件，附带的数据是{ my: &quot;data&quot; }
+foo.anotherMethod() // 在&quot;/&quot;频道发布&quot;foo.some.other&quot;事件，不附带数据
+</code></pre>
+<h2 id="mixin">Mixin</h2>
+<p>在修饰器的基础上，可以实现<code>Mixin</code>模式。所谓<code>Mixin</code>模式，就是对象继承的一种替代方案，中文译为“混入”（mix in），意为在一个对象之中混入另外一个对象的方法。</p>
+<p>请看下面的例子。</p>
+<pre><code class="lang-javascript">const Foo = {
+  foo() { console.log(&#39;foo&#39;) }
+};
+
+class MyClass {}
+
+Object.assign(MyClass.prototype, Foo);
+
+let obj = new MyClass();
+obj.foo() // &#39;foo&#39;
+</code></pre>
+<p>上面代码之中，对象Foo有一个foo方法，通过<code>Object.assign</code>方法，可以将foo方法“混入”MyClass类，导致MyClass的实例obj对象都具有foo方法。这就是“混入”模式的一个简单实现。</p>
+<p>下面，我们部署一个通用脚本<code>mixins.js</code>，将mixin写成一个修饰器。</p>
+<pre><code class="lang-javascript">export function mixins(...list) {
+  return function (target) {
+    Object.assign(target.prototype, ...list);
+  };
+}
+</code></pre>
+<p>然后，就可以使用上面这个修饰器，为类“混入”各种方法。</p>
+<pre><code class="lang-javascript">import { mixins } from &#39;./mixins&#39;
+
+const Foo = {
+  foo() { console.log(&#39;foo&#39;) }
+};
+
+@mixins(Foo)
+class MyClass {}
+
+let obj = new MyClass();
+obj.foo() // &quot;foo&quot;
+</code></pre>
+<p>通过mixins这个修饰器，实现了在MyClass类上面“混入”Foo对象的<code>foo</code>方法。</p>
+<h2 id="trait">Trait</h2>
+<p>Trait也是一种修饰器，效果与Mixin类似，但是提供更多功能，比如防止同名方法的冲突、排除混入某些方法、为混入的方法起别名等等。</p>
+<p>下面采用<a href="https://github.com/CocktailJS/traits-decorator">traits-decorator</a>这个第三方模块作为例子。这个模块提供的traits修饰器，不仅可以接受对象，还可以接受ES6类作为参数。</p>
+<pre><code class="lang-javascript">import { traits } from &#39;traits-decorator&#39;
+
+class TFoo {
+  foo() { console.log(&#39;foo&#39;) }
+}
+
+const TBar = {
+  bar() { console.log(&#39;bar&#39;) }
+}
+
+@traits(TFoo, TBar)
+class MyClass { }
+
+let obj = new MyClass()
+obj.foo() // foo
+obj.bar() // bar
+</code></pre>
+<p>上面代码中，通过traits修饰器，在<code>MyClass</code>类上面“混入”了<code>TFoo</code>类的<code>foo</code>方法和<code>TBar</code>对象的<code>bar</code>方法。</p>
+<p>Trait不允许“混入”同名方法。</p>
+<pre><code class="lang-javascript">import {traits } from &#39;traits-decorator&#39;
+
+class TFoo {
+  foo() { console.log(&#39;foo&#39;) }
+}
+
+const TBar = {
+  bar() { console.log(&#39;bar&#39;) },
+  foo() { console.log(&#39;foo&#39;) }
+}
+
+@traits(TFoo, TBar)
+class MyClass { }
+// 报错
+// throw new Error(&#39;Method named: &#39; + methodName + &#39; is defined twice.&#39;);
+//        ^
+// Error: Method named: foo is defined twice.
+</code></pre>
+<p>上面代码中，TFoo和TBar都有foo方法，结果traits修饰器报错。</p>
+<p>一种解决方法是排除TBar的foo方法。</p>
+<pre><code class="lang-javascript">import { traits, excludes } from &#39;traits-decorator&#39;
+
+class TFoo {
+  foo() { console.log(&#39;foo&#39;) }
+}
+
+const TBar = {
+  bar() { console.log(&#39;bar&#39;) },
+  foo() { console.log(&#39;foo&#39;) }
+}
+
+@traits(TFoo, TBar::excludes(&#39;foo&#39;))
+class MyClass { }
+
+let obj = new MyClass()
+obj.foo() // foo
+obj.bar() // bar
+</code></pre>
+<p>上面代码使用绑定运算符（::）在TBar上排除foo方法，混入时就不会报错了。</p>
+<p>另一种方法是为TBar的foo方法起一个别名。</p>
+<pre><code class="lang-javascript">import { traits, alias } from &#39;traits-decorator&#39;
+
+class TFoo {
+  foo() { console.log(&#39;foo&#39;) }
+}
+
+const TBar = {
+  bar() { console.log(&#39;bar&#39;) },
+  foo() { console.log(&#39;foo&#39;) }
+}
+
+@traits(TFoo, TBar::alias({foo: &#39;aliasFoo&#39;}))
+class MyClass { }
+
+let obj = new MyClass()
+obj.foo() // foo
+obj.aliasFoo() // foo
+obj.bar() // bar
+</code></pre>
+<p>上面代码为TBar的foo方法起了别名aliasFoo，于是MyClass也可以混入TBar的foo方法了。</p>
+<p>alias和excludes方法，可以结合起来使用。</p>
+<pre><code class="lang-javascript">@traits(TExample::excludes(&#39;foo&#39;,&#39;bar&#39;)::alias({baz:&#39;exampleBaz&#39;}))
+class MyClass {}
+</code></pre>
+<p>上面代码排除了TExample的foo方法和bar方法，为baz方法起了别名exampleBaz。</p>
+<p>as方法则为上面的代码提供了另一种写法。</p>
+<pre><code class="lang-javascript">@traits(TExample::as({excludes:[&#39;foo&#39;, &#39;bar&#39;], alias: {baz: &#39;exampleBaz&#39;}}))
+class MyClass {}
+</code></pre>
+<h2 id="babel-">Babel转码器的支持</h2>
+<p>目前，Babel转码器已经支持Decorator。</p>
+<p>首先，安装<code>babel-core</code>和<code>babel-plugin-transform-decorators</code>。由于后者包括在<code>babel-preset-stage-0</code>之中，所以改为安装<code>babel-preset-stage-0</code>亦可。</p>
+<pre><code class="lang-bash">$ npm install babel-core babel-plugin-transform-decorators
+</code></pre>
+<p>然后，设置配置文件<code>.babelrc</code>。</p>
+<pre><code class="lang-javascript">{
+  &quot;plugins&quot;: [&quot;transform-decorators&quot;]
+}
+</code></pre>
+<p>这时，Babel就可以对Decorator转码了。</p>
+<p>脚本中打开的命令如下。</p>
+<pre><code class="lang-javascript">babel.transform(&quot;code&quot;, {plugins: [&quot;transform-decorators&quot;]})
+</code></pre>
+<p>Babel的官方网站提供一个<a href="https://babeljs.io/repl/">在线转码器</a>，只要勾选Experimental，就能支持Decorator的在线转码。</p>
+
+		</article>
+	</div>
+</div>
+
+    <footer id="footer">
+        <i id="upToTop"></i>
+        <p>
+            <span>作者-阮一峰：<a href="http://es6.ruanyifeng.com/">http://es6.ruanyifeng.com/</a></span>|联系方式 <span>|</span> <a href="javascript:void(0);">yangxiaofuPL@163.com</a>
+        </p>
+    </footer>
+    <script src="/public/js/jquery-2.1.4.min.js"></script>
+    <script src="/public/js/highlight.min.js"></script>
+    <script src="/public/js/codepretty.js"></script>
+</body>
+
+</html>
