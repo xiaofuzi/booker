@@ -1,8 +1,9 @@
 var Book = {
 	name: "javascript",
 	title: 'Learn javascript the hard way',
+	author: 'yangxiaofu',
 	server: {
-		domain: '',
+		domain: 'yangxiaofu',
 		port: 3000
 	}
 }

@@ -24,9 +24,8 @@ switch (command){
   case 'server':
     if (args[0] === '-w'){
       require('../lib/cli/watch')();
-    } else {
-      require('../lib/cli/server')();
     }
+    require('../lib/cli/server')();
     break;
 
   case 'deploy':

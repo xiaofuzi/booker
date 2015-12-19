@@ -2,7 +2,8 @@
 #headerWrapper {
     position: relative;
     z-index: 999;
-    background-color: #f9f9f9;
+    /*background-color: #f9f9f9;*/
+    background: #ffffff;
 }
 
 #header {
@@ -352,28 +353,7 @@
 }
 
 
-/*外部字体引入*/
 
-@font-face {
-    font-family: "cartonFont";
-    src: url("../fonts/carton.ttf");
-    src: local("☺"), url("../fonts/carton.ttf") format("truetype");
-    font-weight: normal;
-    font-style: normal;
-}
-
-/*#aboutMe * {
-    font-family: cartonFont;
-}*/
-
-#aboutMe .missing {
-    font-size: 16px;
-    text-align: center;
-    margin-top: 100px;
-}
-
-
-/*websites-page css*/
 .text-warning{
     color: #B24926 !important;
 }
@@ -382,27 +362,6 @@
     color: #B24926 !important;
 }
 
-.websites-body h2{
-    color: #B24926;
-    border-bottom: 1px solid #eee;
-}
-
-
-.websites-body a{
-    display: inline-block;
-    padding: 5px 10px;
-    margin: 5px;
-    border: 1px solid #eee;
-    border-radius: 5px;
-    /*box-shadow: 1px 1px 1px #999;*/
-    color: #000;
-}
-
-.websites-body a:hover{
-    color: #ffffff;
-    background: rgb(75, 75, 75);
-    border: 1px solid #111;
-}
 
 /*代码区域样式修改*/
 
@@ -429,7 +388,6 @@
 
 
 /*up to top*/
-
 #upToTop {
     position: fixed;
     display: block;
@@ -437,7 +395,7 @@
     width: 28px;
     right: 50px;
     bottom: 80px;
-    background: url(../img/icon/arrow_up_circle.png) no-repeat;
+    background: url(/public/img/icon/arrow_up_circle.png) no-repeat;
     background-size: 28px 28px;
     cursor: pointer;
     opacity: 0.5;
