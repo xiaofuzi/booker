@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="keywords" content="杨小福,yangxiaofu,前端,编程,html,css,javascript,nodeJS">
+    <meta name="description" content="杨小福的博客，记点笔记">
+    <title>
+        
+	prototype、__proto__、constructor、this——不懂别说会JS
+
+    </title>
+    <link rel="stylesheet" href="/public/css/public.css">
+    <link rel="stylesheet" href="/public/css/page.css">
+    <link rel="stylesheet" href="/public/css/monokai.min.css">
+    <link rel="stylesheet" href="/public/css/post_add.css">
+    <link id="theme-highlight" rel="stylesheet" href="//cdn.bootcss.com/highlight.js/8.9.1/styles/atelier-dune.light.min.css">
+</head>
+
+<body>
+    <div id="headerWrapper" class="cf">
+        <header id="header" class="cf">
+            <div id="logo">
+                <h1 class="logo">
+					<a href="/">Yangxiaofu</a>
+				</h1>
+                <div class="logo-subtitle">
+                    programmer
+                </div>
+            </div>
+        </header>
+    </div>
+    
+<div id="pageWrapper">
+	<div id="mainContent">
+		<article class="post">
+			<p><img data-src="/img/prototype/so_many_questions.png" alt="so_many_questions">
+刚开始接触js的时候，我的疑问就像上面密密麻麻的问题。。。</p>
+<h2 id="js-">JS对象</h2>
+<ul>
+<li>每一个Javascript对象(null除外)都和另一个对象相关联，即原型，每一个对象都从原型继承属性。</li>
+<li>所有通过对象直接量创建的对象都具有同一个原型对象，通过Object.prototype可以获得对原型对象的引用。</li>
+<li>通过new关键字和构造函数创建的对象的原型就是构造函数的prototype属性的值</li>
+<li>普通的原型对象属于普通对象，普通对象都具有原型(Object.prototype比较特殊，不继承任何属性)</li>
+<li>所有的内置构造函数以及大部分自定义构造函数都具有一个继承自Object.prototype的原型</li>
+<li>构造函数的原型中存在预先定义好的constructor属性，对象继承的constructor均指代他们的构造函数。构造函数是类的标识，因此这个constructor属性为对象提供了类</li>
+</ul>
+<pre><code class="lang-javascript">var o = new F();
+o.constructor === F    /*true,指代类本身*/
+</code></pre>
+<!-- more -->
+<h2 id="javascript-class-">Javascript中class的写法</h2>
+<p>注：为和普通函数区别开，类的命名首字母一般是大写</p>
+<p>下面定义了Cat、cat类</p>
+<pre><code class="lang-javascript">/*写法一：*/
+var Cat = function(){
+    this.animal = &quot;Cat:大写的猫&quot;;
+};
+
+var cat = function(){
+    this.animal = &quot;cat:小写的猫&quot;;
+};
+</code></pre>
+<pre><code class="lang-javascript">/*写法二：*/
+function Cat(){
+    this.animal = &quot;Cat:大写的猫&quot;;
+}
+
+function cat(){
+    this.animal = &quot;Cat:小写的猫&quot;;
+}
+</code></pre>
+<p>这里输出的结果是相同的，即类的命名首字母大写并不是强制的</p>
+<h3 id="-">对象生成</h3>
+<pre><code class="lang-javascript">var objCat = new Cat; /*大写的猫对象*/
+var objcat = new cat; /*小写的猫对象*/
+
+/*输出*/
+console.log(objCat, objcat);
+</code></pre>
+<p><img src="/img/prototype/cat-01.png" alt="类的命名首字母大写并不是强制的"></p>
+<p>从上面我们可以看到:对象objCat——&gt;<strong>proto</strong>[Cat类]——&gt;<strong>proto</strong>[Object对象],这就是所谓的继承链.</p>
+<h2 id="prototype-vs-__proto__-">prototype VS <strong>proto</strong> 对象</h2>
+<h3 id="-prototype-">添加prototype对象</h3>
+<p>这里给Cat添加prototype对象,cat不做改动</p>
+<pre><code class="lang-javascript">/*写法一：*/
+var Cat = function(){
+    this.animal = &quot;Cat:大写的猫&quot;;
+};
+
+var cat = function(){
+    this.animal = &quot;cat:小写的猫&quot;;
+};
+
+Cat.prototype.eat = function(){
+    return &quot;I like fish!&quot;;
+}
+</code></pre>
+<p>说明：同一个类生成的所有对象会共用类的prototype对象上挂载的方法和属性</p>
+<pre><code class="lang-javascript">redCat = new Cat;
+greenCat = new Cat;
+
+console.log(redCat.eat(), greenCat.eat());
+</code></pre>
+<p>redCat和greenCat调用的是同一个方法即Cat.prototype.eat,所以都会输出&quot;I like fish!&quot;.</p>
+<pre><code class="lang-javascript">Cat.prototype.eat = function(){
+    return &quot;I like fish!&quot;;
+}
+</code></pre>
+<p>/<em>同样输出两个生成的对象</em>/</p>
+<pre><code class="lang-javascript">console.log(objCat, objcat);
+</code></pre>
+<p><img src="/img/prototype/cat-02.png" alt="这里给Cat添加prototype对象,cat不做改动"></p>
+<p>从上图可以发现大写的猫对象多输出了两行,这里出现了一个&quot;<strong>proto</strong>&quot;属性,那么它代表什么呢？因为这是我们的Cat类设置了prototype后Cat对象才出现的属性，所以我们可以猜测这两者之间有某种密切的关系，为了验证我们的想法，我们可以输出测试一下。</p>
+<pre><code class="lang-javascript">console.log(objCat.__proto__, Cat.prototype);
+</code></pre>
+<p><img src="/img/prototype/cat-03.png" alt="console.log(objCat.__proto__, Cat.prototype)"></p>
+<p>我们可以惊奇的发现输出结果一模一样，为了再次证明它们是同一个东西，我们再次进行验证</p>
+<pre><code class="lang-javascript">/*注意这里是3个等号哦*/
+console.log(objCat.__proto__ === Cat.prototype);              /*result:true*/
+console.log(objCat.__proto__.eat(), Cat.prototype.eat());    /*I like fish! I like fish!,调用了同一个 eat 方法*/
+</code></pre>
+<p>从这里我们可以得一个结论：对象会继承类的prototype对象并存在一个名为&quot;<strong>proto</strong>&quot;的属性中,即对象的&quot;<strong>proto</strong>&quot;属性指向生成它的类的&quot;prototype&quot;对象</p>
+<p class="text-important">protoype和<strong>proto</strong>统称为原型对象，但前者是在类中，后者是在对象中的表示，实例对象中没有prototype属性的。[js中的类是通过function来模拟的，每一个function都有一个prototype属性</p>
+
+<h2 id="constructor-">constructor属性</h2>
+<p>构造函数的原型中存在预先定义好的constructor属性，对象继承的constructor均指代他们的构造函数。构造函数是类的标识，因此这个constructor属性为对象提供了类.</p>
+<p>这句话怎么来理解呢？</p>
+<p>1 .构造函数的原型中存在预定义好的constructor属性
+2 .constructor指代他们的构造函数
+3 .constructor属性为对象提供了类</p>
+<pre><code class="lang-javascript">var CatConstructor = Cat.prototype.constructor;
+console.log(&quot;Cat:&quot;, Cat, Cat.prototype);
+console.log(&quot;CatConstructor:&quot;, CatConstructor, CatConstructor.prototype);
+</code></pre>
+<p>这里为了更清晰的理解上面这几个点，我们将Cat类的原型的constructor属性赋值给CatConstructor,然后分别打印他们本身以及他们的原型对象。</p>
+<p><img src="/img/prototype/cat-04.png" alt="Cat.prototype.constructor"></p>
+<p>从上图我们可以发现两者是完全一样的，即Cat.prototype.constructor等于Cat本身。</p>
+<p>那么第三点怎么理解呢？既然constructor代表Cat构造函数本身，那么我们是不是可以用它来生成对象——类才具有的功能</p>
+<pre><code class="lang-javascript">var CatConstructor = Cat.prototype.constructor;
+var newObjCat = new CatConstructor;
+
+console.log(&quot;objCat:&quot;, objCat, &quot;newObjCat&quot;, newObjCat);
+</code></pre>
+<p><img src="/img/prototype/cat-05.png" alt=""objCat:", objCat, "newObjCat", newObjCat"></p>
+<p>如我们所料，上面输出的objCat和newObjCat结果是一样的，所以验证了第三点，类的原型的constructor属性即类本身</p>
+<h2 id="this-">this——到底指向了谁</h2>
+<pre><code class="lang-javascript">Cat.init = function(){
+    console.log(&quot;Cat:&quot;, this);
+    return this;
+}
+
+Cat.prototype.init = function(){
+    console.log(&quot;Cat-prototype:&quot;, this);
+    return this;
+}
+
+Cat.init();                /*this代表Cat类本身*/
+Cat.prototype.init();    /*this代表Cat.prototype对象*/
+
+objCat.init();            /*this代表objCat对象本身*/
+</code></pre>
+<p><img src="/img/prototype/cat-06.png" alt="this——到底指向了谁"></p>
+<p>从上图可以发现，输出为：</p>
+<p>Cat.init():输出构成函数本身
+Cat.prototype.init():输出类的原型对象
+objCat.init(): 输出结果都是objCat对象本身且调用的是Cat.prototype.init方法</p>
+<p>从上面我们可以知道this始终指向调用方法的对象本身</p>
+<h3 id="-">构造函数中调用原型对象上绑定的方法——指向谁呢</h3>
+<p>注：当我们在说构造函数的时候，其实是将构造函数和类等同起来</p>
+<pre><code class="lang-javascript">/*jquery构造函数模拟*/
+var Cat = function(){
+    this.animal = &quot;Cat:大写的猫&quot;;
+    /*调用原型上绑定的init方法*/
+    return new Cat.prototype.init();
+};
+Cat.prototype = {
+    init: function(){
+        return this;    /*当做为构造函数时，返回值好像并没有啥用处*/
+    }
+}
+Cat.prototype.init.prototype = Cat.prototype;
+
+Cat();
+</code></pre>
+<h3 id="-">稍稍复杂一点的情况</h3>
+<pre><code class="lang-javascript">var Cat = function(params){
+    this.animal = &quot;Cat:大写的猫&quot;;
+    /*调用原型上绑定的init方法*/
+    return new Cat.prototype.init(params);
+};
+Cat.prototype = {
+    init: function(params){
+        this.animal = params;
+        this.type = params;
+        this.color = params;
+    },
+    eat: function(){
+        return &quot;I like fish!&quot;;
+    },
+    name: function(){
+        return this.animal;
+    },
+    color: &#39;yellow&#39;
+}
+Cat.prototype.init.prototype = Cat.prototype;
+
+var redCat = Cat(&quot;redCat&quot;);
+var greenCat = Cat(&quot;greenCat&quot;);
+console.log(redCat, greenCat);
+</code></pre>
+<p>输出结果如下：</p>
+<p><img src="/img/prototype/cat-07.png" alt="jquery对象生成方式模拟"></p>
+<p class="text-important">这里的init方法里的this指向的是Cat.prototype,init方法里的animal和Cat类的animal也没有关系,init这时相当于我们的构造函数，而它自身又是自身的prototype里的一个方法[是不是已已绕晕。。。]</p>
+
+<ul>
+<li>this.animal = params;</li>
+<li>this.type = params;</li>
+<li>this.color = params;</li>
+</ul>
+<p>它们是构造函数即类的属性，而init函数外面的color: &#39;yellow&#39;是挂在原型上的，所以生成的对象在访问color属性的时候是获取构造函数里的值[原型链继承的优先级]</p>
+<pre><code class="lang-javascript">console.log(redCat.__proto__.color);        /*输出结果是:yelow,说明我的确是挂在类的原型上的*/
+</code></pre>
+<p class="text-important">上述的jquery构造函数语法模拟的一个不足就是无法得到Cat类上的属性,如Cat里的animal.[如果你有好的方法获取请告知我]</p>
+
+
+
+
+
+
+
+		</article>
+	</div>
+</div>
+
+    <footer id="footer">
+        <i id="upToTop"></i>
+        <p>
+            联系方式 <span>|</span> <a href="javascript:void(0);">yangxiaofuPL@163.com</a>
+        </p>
+    </footer>
+    <script src="//cdn.bootcss.com/jquery/2.1.4/jquery.min.js"></script>
+    <script src="public/js/highlight.min.js"></script>
+    <script src="public/js/post.js"></script>
+    <script>
+    $(document).ready(function() {
+        $('.highlight').each(function(i, block) {
+            hljs.highlightBlock(block);
+        });
+    });
+    </script>
+</body>
+
+</html>

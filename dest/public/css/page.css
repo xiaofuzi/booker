@@ -1,0 +1,450 @@
+/*头部样式*/
+#headerWrapper {
+    position: relative;
+    z-index: 999;
+    background-color: #f9f9f9;
+}
+
+#header {
+    position: relative;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px 10px;
+}
+
+#logo {
+    float: left;
+}
+
+@media screen and (max-width: 376px) {
+    #logo {
+        margin-bottom: 30px;
+    }
+    #main-nav {
+        bottom: 40px;
+    }
+}
+
+#logo a {
+    color: #222;
+    font-weight: 700;
+}
+
+.logo-subtitle {
+    letter-spacing: 5px;
+    font-size: 12px;
+    color: #aaa;
+}
+
+#main-nav {
+    position: absolute;
+    right: 20px;
+}
+
+#main-nav ul {
+    position: relative;
+    bottom: -20px;
+}
+
+#main-nav li {
+    float: left;
+}
+
+#main-nav li a {
+    display: inline-block;
+    line-height: 20px;
+    font-size: 16px;
+    font-weight: 500;
+    color: #444;
+}
+
+#main-nav li a:hover {
+    color: #000;
+}
+
+#main-nav li+li {
+    margin-left: 20px;
+}
+
+
+/*post style*/
+#mainContent {
+    position: relative;
+    max-width: 900px;
+    padding: 20px 10px;
+    margin: 0 auto;
+}
+
+/*首页post索引*/
+#mainContent .items-wrap{
+    display: flex;
+    display: -webkit-flex;
+    -webkit-flex-direction:column;
+    flex-direction:column;
+}
+
+/*#mainContent a:visited{
+    color: #0b0080;
+}*/
+
+/*post a global style*/
+#mainContent .post-body a{
+    color: #4183C4;
+}
+
+
+#mainContent h1 {
+    font-size: 18px;
+    font-weight: 600;
+}
+
+#mainContent h2 {
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 5px;
+}
+
+#mainContent h3 {
+    font-size: 15px;
+    font-weight: 500;
+    margin-bottom: 5px;
+}
+
+#mainContent p {
+    margin: 10px 0;
+    font-size: 16px;
+}
+
+#mainContent p a {
+    color: #111;
+}
+
+#mainContent p a:hover {
+    color: #444;
+}
+
+#mainContent ul {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    padding: 0 0 0 20px;
+}
+
+#mainContent ul li {
+    list-style: disc;
+    line-height: 150%;
+}
+
+#mainContent ul a{
+    color: #666;
+}
+
+#mainContent ul a:hover {
+    color: #222;
+}
+
+
+#mainContent .post-archive aside{
+	display: none;
+}
+
+@media screen and (min-width: 720px) {
+    /*标签导航*/
+    #mainContent .post-archive {
+        position: relative;
+        padding-right: 150px;
+    }
+    #mainContent .post-archive aside {
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 150px;
+        height: 100%;
+        color: #000;
+        padding: 5px 10px;
+        background-color: #f9f9f9;
+        display: block;
+        box-sizing: border-box;
+    }
+    #mainContent .post-archive aside .post-tags {
+        padding-left: 20px;
+    }
+    #mainContent .post-archive aside .post-tags li {
+        list-style: circle;
+        letter-spacing: 1px;
+    }
+
+    #mainContent .post-archive aside .post-tags span {
+        font-size: 13px;
+    }
+}
+
+.post a {
+    color: #444;
+}
+
+.post h1 a:hover,
+.post h2 a:hover {
+    color: #222;
+    text-decoration: none;
+}
+
+.post a:hover {
+    color: #999;
+    text-decoration: underline;
+}
+
+.post-info a {
+    font-size: 12px;
+    color: #9c9c9c;
+}
+
+.post-info a:hover {
+    color: #444;
+}
+
+.post-body {
+    position: relative;
+    margin-top: 10px;
+    margin-bottom: 50px;
+    font-size: 14px;
+}
+
+.post-body a{
+    font-size: 16px;
+}
+
+.post-body img {
+    max-width: 100%;
+}
+
+.post-body h1,
+.post-body h2,
+.post-body h3,
+.post-body h4,
+.post-body h5,
+.post-body h6,
+.post-body p {
+    margin-top: 30px;
+}
+
+
+/*文章索引页*/
+
+.posts-index li {
+    padding: 5px 0;
+    list-style: disc;
+}
+
+.posts-index a {
+    display: inline-block;
+    color: #666;
+    height: 20px;
+    line-height: 20px;
+}
+
+.posts-index a:hover {
+    color: #444;
+}
+
+
+/*主体内容区*/
+
+#mainContent {
+    min-height: 400px;
+}
+
+.posts-index .post-time {
+    font-size: 12px;
+    color: #9c9c9c;
+}
+
+
+/*底部*/
+
+#footer {
+    max-width: 900px;
+    margin: 10px auto;
+    padding-top: 10px;
+    font-size: 12px;
+    text-align: right;
+    border-top: 1px solid #e9eaec;
+}
+
+#footer a {
+    color: #9c9c9c;
+}
+
+#footer a:hover {
+    color: #444;
+}
+
+
+/*post摘要显示*/
+
+.post-body .postMore {
+    color: rgb(156, 14, 14);
+}
+
+.post-body .postMore:hover {
+    color: red;
+}
+
+
+/*上一篇，下一篇*/
+
+.post-nav a {
+    color: #333;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    cursor: pointer;
+}
+
+.post-nav a:hover {
+    color: #4183C4;
+    text-decoration: none;
+}
+
+.post-nav .next {
+    float: right;
+}
+
+
+/*分页*/
+
+.pagination a,
+.pagination span {
+    display: inline-block;
+    width: 30px;
+    height: 24px;
+    line-height: 24px;
+    text-align: center;
+    color: #999;
+    font-weight: 900;
+    border: 1px solid #eee;
+    margin-left: -1px;
+}
+
+.pagination .prev {
+    display: inline-block;
+    padding: 0 5px;
+    height: 24px;
+    line-height: 24px;
+    text-align: center;
+    border: 1px solid #eee;
+}
+
+.pagination .next {
+    display: inline-block;
+    padding: 0 5px;
+    height: 24px;
+    line-height: 24px;
+    text-align: center;
+    border: 1px solid #eee;
+}
+
+.pagination a {
+    color: #666;
+}
+
+.pagination a:hover {
+    color: #222;
+}
+
+
+/*外部字体引入*/
+
+@font-face {
+    font-family: "cartonFont";
+    src: url("../fonts/carton.ttf");
+    src: local("☺"), url("../fonts/carton.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+}
+
+/*#aboutMe * {
+    font-family: cartonFont;
+}*/
+
+#aboutMe .missing {
+    font-size: 16px;
+    text-align: center;
+    margin-top: 100px;
+}
+
+
+/*websites-page css*/
+.text-warning{
+    color: #B24926 !important;
+}
+
+.text-warning a{
+    color: #B24926 !important;
+}
+
+.websites-body h2{
+    color: #B24926;
+    border-bottom: 1px solid #eee;
+}
+
+
+.websites-body a{
+    display: inline-block;
+    padding: 5px 10px;
+    margin: 5px;
+    border: 1px solid #eee;
+    border-radius: 5px;
+    /*box-shadow: 1px 1px 1px #999;*/
+    color: #000;
+}
+
+.websites-body a:hover{
+    color: #ffffff;
+    background: rgb(75, 75, 75);
+    border: 1px solid #111;
+}
+
+/*代码区域样式修改*/
+
+.highlight {
+    position: relative;
+}
+
+#highlightTheme {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+}
+
+#highlightTheme span {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    margin-right: 3px;
+    border: 1px solid #999;
+    box-shadow: 1px 1px 2px #999;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+
+/*up to top*/
+
+#upToTop {
+    position: fixed;
+    display: block;
+    height: 28px;
+    width: 28px;
+    right: 50px;
+    bottom: 80px;
+    background: url(../img/icon/arrow_up_circle.png) no-repeat;
+    background-size: 28px 28px;
+    cursor: pointer;
+    opacity: 0.5;
+    display: none;
+    z-index: 9999;
+}
+
+#upToTop:hover {
+    opacity: 1;
+}

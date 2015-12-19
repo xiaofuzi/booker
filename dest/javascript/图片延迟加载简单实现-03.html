@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="keywords" content="杨小福,yangxiaofu,前端,编程,html,css,javascript,nodeJS">
+    <meta name="description" content="杨小福的博客，记点笔记">
+    <title>
+        
+	图片延迟加载简单实现
+
+    </title>
+    <link rel="stylesheet" href="/public/css/public.css">
+    <link rel="stylesheet" href="/public/css/page.css">
+    <link rel="stylesheet" href="/public/css/monokai.min.css">
+    <link rel="stylesheet" href="/public/css/post_add.css">
+    <link id="theme-highlight" rel="stylesheet" href="//cdn.bootcss.com/highlight.js/8.9.1/styles/atelier-dune.light.min.css">
+</head>
+
+<body>
+    <div id="headerWrapper" class="cf">
+        <header id="header" class="cf">
+            <div id="logo">
+                <h1 class="logo">
+					<a href="/">Yangxiaofu</a>
+				</h1>
+                <div class="logo-subtitle">
+                    programmer
+                </div>
+            </div>
+        </header>
+    </div>
+    
+<div id="pageWrapper">
+	<div id="mainContent">
+		<article class="post">
+			<style>img {opacity: 1;transition: opacity 0.2s;max-width: 100%;}img[data-src] {opacity: 0;}</style>
+
+<p>图片往往是造成网页加载缓慢的原因，通过延迟图片的加载可以提高用户体验，优先加载重要的内容。</p>
+<p><img data-src="/img/tree.png" alt="tree">
+<!-- more -->
+<img data-src="/img/christina.jpg" alt="christina"></p>
+<h2 id="1-data-src-img-src-">1.使用data-src属性代替img的src属性</h2>
+<pre><code class="lang-html">&lt;div class=&quot;wrapper&quot;&gt;
+        &lt;img data-src=&quot;./img/lazy.jpg&quot; alt=&quot;lazy.jpg&quot;&gt;
+&lt;/div&gt;
+</code></pre>
+<pre><code class="lang-css">/*先将待加载图片隐藏，加载完成后显示*/
+img {
+        opacity: 1;
+        transition: opacity 0.2s;
+    }
+
+    img[data-src] {
+        opacity: 0;
+    }
+</code></pre>
+<p>说明：img标签并不会将图片嵌入到网页中，而是提供一个占位符即给图片提供一个显示的空间。图片的显示需要浏览器根据src属性来加载。所以上述方式并不会加载图片。</p>
+<h2 id="2-html-js-img-data-src-src-">2.当html文档加载完成后通过js将img的data-src属性转换为src,从而加载图片</h2>
+<pre><code class="lang-javascript">/*原生js实现*/
+[].forEach.call(document.querySelectorAll(&#39;img[data-src]&#39;), function(img) {
+        img.setAttribute(&#39;src&#39;, img.getAttribute(&#39;data-src&#39;));
+        img.onload = function() {
+            /*图片加载完成后data-src属性就可以去掉了*/
+            img.removeAttribute(&#39;data-src&#39;);
+        };
+    });
+/*jQuery实现*/
+$(&#39;img[data-src]&#39;).each(function(){
+    var $img = $(this);
+    $img.attr(&#39;src&#39;, $img.attr(&#39;data-src&#39;));
+    $img.load(function(){
+        $img.removeAttr(&#39;data-src&#39;);
+    })
+});
+</code></pre>
+<p>说明：遍历所有包含data-src属性的img元素然后将data-src属性转换为src属性</p>
+<script>
+    [].forEach.call(document.querySelectorAll('img[data-src]'), function(img) {
+        img.setAttribute('src', img.getAttribute('data-src'));
+        img.onload = function() {
+            /*图片加载完成后data-src属性就可以去掉了*/
+            img.removeAttribute('data-src');
+        };
+    });
+</script>
+
+		</article>
+	</div>
+</div>
+
+    <footer id="footer">
+        <i id="upToTop"></i>
+        <p>
+            联系方式 <span>|</span> <a href="javascript:void(0);">yangxiaofuPL@163.com</a>
+        </p>
+    </footer>
+    <script src="//cdn.bootcss.com/jquery/2.1.4/jquery.min.js"></script>
+    <script src="public/js/highlight.min.js"></script>
+    <script src="public/js/post.js"></script>
+    <script>
+    $(document).ready(function() {
+        $('.highlight').each(function(i, block) {
+            hljs.highlightBlock(block);
+        });
+    });
+    </script>
+</body>
+
+</html>

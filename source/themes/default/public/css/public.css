@@ -1,0 +1,189 @@
+/*重置样式*/
+html, body, div, span, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+abbr, address, cite, code,
+del, dfn, em, img, ins, kbd, q, samp,
+small, strong, sub, sup, var,
+b, i,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, figcaption, figure, 
+footer, header, hgroup, menu, nav, section, summary,
+time, mark, audio, video {
+    margin:0;
+    padding:0;
+    border:0;
+    outline:0;
+    font-size:100%;
+    background:transparent;
+    font-family:'PT Sans', Trebuchet MS, Arial,Verdana,"Lantinghei SC","Hiragino Sans GB","Microsoft Yahei",Helvetica,arial,\5b8b\4f53,sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+abbr, address, cite, code,
+del, dfn, em, img, ins, kbd, q, samp,
+small, strong, sub, sup, var,
+b, i,
+dl, dt, dd, ol, li, span{
+    line-height: 1.5;
+}
+
+:focus {
+	outline: 1;
+}
+
+article,aside,canvas,details,figcaption,figure,
+footer,header,hgroup,menu,nav,section,summary { 
+    display:block;
+}
+
+nav ul {
+    list-style:none;
+}
+
+blockquote, q {
+    quotes:none;
+}
+
+blockquote:before, blockquote:after,
+q:before, q:after {
+    content:'';
+    content:none;
+}
+
+a {
+    margin:0;
+    padding:0;
+    border:0;
+    font-size:100%;
+    background:transparent;
+}
+
+ins {
+    background-color:#ff9;
+    color:#000;
+    text-decoration:none;
+}
+
+mark {
+    background-color:#ff9;
+    color:#000; 
+    font-style:italic;
+    font-weight:bold;
+}
+
+del {
+    text-decoration: line-through;
+}
+
+abbr[title], dfn[title] {
+    border-bottom:1px dotted #000;
+    cursor:help;
+}
+
+table {
+    border-collapse:collapse;
+    border-spacing:0;
+}
+
+hr {
+    display:block;
+    height:1px;
+    border:0;   
+    border-top:1px solid #cccccc;
+    margin:1em 0;
+    padding:0;
+}
+
+input, select {
+    vertical-align:middle;
+    outline: none;
+}
+li{
+	list-style: none;
+}
+
+a{
+	text-decoration: none;
+}
+
+/*公共样式*/
+.cf::after{
+	content: '';
+	display: block;
+	clear: both;
+	height: 0;
+	overflow: hidden;
+	visibility: hidden;
+}
+
+body{
+	font-family: arial;
+	font-size: 16px;
+	font-style: normal;
+	font-weight: 400;
+	color: #444;
+	background: #ffffff;
+    min-width: 320px;
+}
+
+figure{
+    margin: 10px 0;
+    padding: 20px;
+}
+
+.margin-auto{
+    display: block;
+    width: 100%;
+    margin: 0 auto;
+}
+
+.text-important{
+    color: red;
+}
+
+.text-center{
+    text-align: center;
+}
+
+
+/*先将待加载图片隐藏，加载完成后显示*/
+img {
+        opacity: 1;
+        transition: opacity 0.2s;
+    }
+    
+    img[data-src] {
+        opacity: 0;
+    }
+
+.warning-btn{
+    display: inline-block;
+    padding: 5px 10px;
+    background: #B24926;
+    border: 1px solid #B24926;
+    color: #ffffff;
+}
+
+.warning-btn:hover{
+    border: 1px solid #eee;
+    background: #414141;
+}
+
+#look_more{
+    width: 200px;
+    text-decoration: none;
+    color: #ffffff !important;
+}
+
+.header-preview{
+    background: #111;
+    padding: 40px 0;
+    color: #ffffff;
+    text-align: center;
+}
+
+.header-preview h2{
+    font-size: 36px !important;
+}

@@ -1,0 +1,392 @@
+/* css3简易魔方绘制页面样式*/
+
+
+/*1. rotateX演示动画*/
+
+@keyframes rotateX {
+    0% {
+        transform: rotateX(0);
+    }
+    45% {
+        transform: rotateX(45deg);
+    }
+    70% {
+        transform: rotateX(90deg);
+    }
+    100% {
+        transform: rotateX(135deg);
+    }
+}
+
+.rotateX-wrapper {
+    height: 80px;
+}
+
+.rotateX-wrapper .box {
+    position: absolute;
+    background: brown;
+    height: 50px;
+    width: 50px;
+    transform: rotateX(45deg);
+    animation: rotateX 3s infinite;
+}
+
+
+/*2. rotateY演示动画*/
+
+@keyframes rotateY {
+    0% {
+        transform: rotateY(0);
+    }
+    45% {
+        transform: rotateY(45deg);
+    }
+    70% {
+        transform: rotateY(90deg);
+    }
+    100% {
+        transform: rotateY(135deg);
+    }
+}
+
+.rotateY-wrapper {
+    height: 80px;
+}
+
+.rotateY-wrapper .box {
+    position: absolute;
+    background: brown;
+    height: 50px;
+    width: 50px;
+    transform: rotateY(45deg);
+    animation: rotateY 3s infinite;
+}
+
+
+/*3. rotateZ演示动画*/
+
+@keyframes rotateZ {
+    0% {
+        transform: rotateZ(0);
+    }
+    45% {
+        transform: rotateZ(45deg);
+    }
+    70% {
+        transform: rotateZ(90deg);
+    }
+    100% {
+        transform: rotateZ(135deg);
+    }
+}
+
+.rotateZ-wrapper {
+    height: 80px;
+}
+
+.rotateZ-wrapper .box {
+    position: absolute;
+    background: brown;
+    height: 50px;
+    width: 50px;
+    transform: rotateZ(45deg);
+    animation: rotateZ 3s infinite;
+}
+
+
+/*1. translateX演示动画*/
+
+@keyframes translateX {
+    0% {
+        transform: translateX(0);
+    }
+    45% {
+        transform: translateX(50px);
+    }
+    70% {
+        transform: translateX(90px);
+    }
+    100% {
+        transform: translateX(135px);
+    }
+}
+
+.translateX-wrapper {
+    height: 120px;
+}
+
+.translateX-wrapper .box {
+    position: absolute;
+    background: brown;
+    height: 50px;
+    width: 100px;
+    color: #ffffff;
+    animation: translateX 3s infinite;
+}
+
+
+/*2. translateY演示动画*/
+
+@keyframes translateY {
+    0% {
+        transform: translateY(0);
+    }
+    45% {
+        transform: translateY(20px);
+    }
+    70% {
+        transform: translateY(40px);
+    }
+    100% {
+        transform: translateY(60px);
+    }
+}
+
+.translateY-wrapper {
+    height: 80px;
+}
+
+.translateY-wrapper .box {
+    background: brown;
+    height: 50px;
+    width: 100px;
+    color: #ffffff;
+    animation: translateY 3s infinite;
+}
+
+
+/*3. translateZ演示动画*/
+
+@keyframes translateZ {
+    0% {
+        transform: translateZ(0);
+    }
+    45% {
+        transform: translateZ(20px);
+    }
+    70% {
+        transform: translateZ(40px);
+    }
+    100% {
+        transform: translateZ(60px);
+    }
+}
+
+.translateZ-wrapper {
+    height: 80px;
+}
+
+.translateZ-wrapper .box {
+    background: brown;
+    height: 50px;
+    width: 100px;
+    color: #ffffff;
+    animation: translateZ 3s infinite;
+}
+
+.square-wrapper,
+.square-wrapper > div,
+.square-wrap,
+.square-wrap > div {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+}
+
+.square-wrapper .top {
+    background-color: red;
+}
+
+.square-wrapper .bottom: {
+    background-color: #ffffff;
+}
+
+.square-wrapper .left {
+    background-color: green;
+}
+
+.square-wrapper .right {
+    background-color: blue;
+}
+
+.square-wrapper .front {
+    background-color: #ddd;
+}
+
+.square-wrapper .behind {
+    background-color: #000000;
+}
+
+
+/*立体实现*/
+
+.square-wrap {
+    margin-top: 20px;
+    transform-style: preserve-3d;
+    animation: square-animation 5s infinite;
+}
+
+@keyframes square-animation {
+    0% {
+        transform: rotateX(0deg) rotateY(0deg);
+    }
+    45% {
+        transform: rotateX(90deg)
+    }
+    75% {
+        transform: rotateY(90deg);
+    }
+    90% {
+        transform: rotateX(45deg) rotateY(45deg);
+    }
+    100% {
+        transform: rotateX(0deg) rotateY(0deg);
+    }
+}
+
+.square-wrap .top {
+    background-color: red;
+    transform: translateY(-50px) rotateX(90deg);
+}
+
+.square-wrap .bottom {
+    background-color: brown;
+    transform: translateY(50px) rotateX(-90deg);
+}
+
+.square-wrap .left {
+    background-color: green;
+    transform: translateX(-50px) rotateY(90deg);
+}
+
+.square-wrap .right {
+    background-color: blue;
+    transform: translateX(50px) rotateY(-90deg);
+}
+
+.square-wrap .front {
+    background-color: #ddd;
+    transform: translateZ(50px);
+}
+
+.square-wrap .behind {
+    background-color: #000000;
+    transform: translateZ(-50px);
+}
+
+
+/*心形*/
+
+#heart {
+    position: relative;
+    width: 100px;
+    height: 90px;
+}
+
+#heart:before,
+#heart:after {
+    position: absolute;
+    content: '';
+    left: 50px;
+    top: 0;
+    width: 50px;
+    height: 80px;
+    background: red;
+    border-radius: 50px 50px 0 0;
+    transform: rotate(-45deg);
+    transform-origin: 0 100%;
+}
+
+#heart:after{
+    left: 0;
+    transform: rotate(45deg);
+    transform-origin: 100% 100%;
+}
+
+/*八卦*/
+#baguai-wrap{
+    position: relative;
+    padding-top: 30px;
+    height: 150px;
+    background-color: gray;
+}
+
+#baguai-wrap .b1-circle{
+    position: relative;
+    width: 100px;
+    height: 0;
+    border-top: 50px solid #ffffff;
+    border-bottom: 50px solid #000000;
+    border-radius: 50%;
+    margin: 0 auto;
+}
+
+#baguai-wrap .b2-circle{
+    position: relative;
+    width: 100px;
+    height: 0;
+    border-top: 50px solid #ffffff;
+    border-bottom: 50px solid #000000;
+    border-radius: 50%;
+    margin: 0 auto;
+}
+
+#baguai-wrap .b-circle{
+    position: relative;
+    width: 100px;
+    height: 0;
+    border-top: 50px solid #ffffff;
+    border-bottom: 50px solid #000000;
+    border-radius: 50%;
+    margin: 0 auto;
+}
+
+#baguai-wrap .b-circle:before{
+    position: absolute;
+    content: '';
+    left: 0;
+    top: -25px;
+    width: 10px;
+    height: 10px;
+    border: 20px solid #000000;
+    background: #ffffff;
+    border-radius: 50%;
+}
+
+#baguai-wrap .b-circle:after{
+    position: absolute;
+    content: '';
+    left: 50px;
+    top: -25px;
+    width: 10px;
+    height: 10px;
+    border: 20px solid #ffffff;
+    background-color: #000000;
+    border-radius: 50%;
+}
+
+#baguai-wrap .b2-circle:before{
+    position: absolute;
+    content: '';
+    left: 0;
+    top: -25px;
+    width: 10px;
+    height: 10px;
+    border: 20px solid red;
+    background: #ffffff;
+    border-radius: 50%;
+}
+
+#baguai-wrap .b2-circle:after{
+    position: absolute;
+    content: '';
+    left: 50px;
+    top: -25px;
+    width: 10px;
+    height: 10px;
+    border: 20px solid green;
+    background-color: #000000;
+    border-radius: 50%;
+}
+
+
