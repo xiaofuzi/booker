@@ -29,6 +29,7 @@
 #logo a {
     color: #222;
     font-weight: 700;
+    font-size: 24px;
 }
 
 .logo-subtitle {
@@ -76,17 +77,6 @@
     margin: 0 auto;
 }
 
-/*首页post索引*/
-#mainContent .items-wrap{
-    display: flex;
-    display: -webkit-flex;
-    -webkit-flex-direction:column;
-    flex-direction:column;
-}
-
-/*#mainContent a:visited{
-    color: #0b0080;
-}*/
 
 /*post a global style*/
 #mainContent .post-body a{
@@ -124,10 +114,11 @@
     color: #444;
 }
 
-#mainContent ul {
+#mainContent ul,
+#mainContent ol {
     margin-top: 10px;
     margin-bottom: 10px;
-    padding: 0 0 0 20px;
+    padding: 0 0 0 30px;
 }
 
 #mainContent ul li {
@@ -143,6 +134,9 @@
     color: #222;
 }
 
+#mainContent ol li{
+    list-style: decimal;
+}
 
 #mainContent .post-archive aside{
 	display: none;

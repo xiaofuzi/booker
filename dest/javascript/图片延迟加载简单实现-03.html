@@ -4,18 +4,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <meta name="keywords" content="杨小福,yangxiaofu,前端,编程,html,css,javascript,nodeJS">
-    <meta name="description" content="杨小福的博客，记点笔记">
     <title>
         
 	图片延迟加载简单实现
 
     </title>
+    <link rel="shortcut icon" href="/public/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="/public/css/public.css">
     <link rel="stylesheet" href="/public/css/page.css">
     <link rel="stylesheet" href="/public/css/monokai.min.css">
-    <link rel="stylesheet" href="/public/css/post_add.css">
-    <link id="theme-highlight" rel="stylesheet" href="//cdn.bootcss.com/highlight.js/8.9.1/styles/atelier-dune.light.min.css">
 </head>
 
 <body>
@@ -23,17 +20,17 @@
         <header id="header" class="cf">
             <div id="logo">
                 <h1 class="logo">
-					<a href="/">Yangxiaofu</a>
+					<a href="/"> 
+	Learn javascript the hard way
+</a>
 				</h1>
-                <div class="logo-subtitle">
-                    programmer
-                </div>
             </div>
         </header>
     </div>
     
 <div id="pageWrapper">
 	<div id="mainContent">
+		<h2>图片延迟加载简单实现</h2>
 		<article class="post">
 			<style>img {opacity: 1;transition: opacity 0.2s;max-width: 100%;}img[data-src] {opacity: 0;}</style>
 
@@ -96,16 +93,9 @@ $(&#39;img[data-src]&#39;).each(function(){
             联系方式 <span>|</span> <a href="javascript:void(0);">yangxiaofuPL@163.com</a>
         </p>
     </footer>
-    <script src="//cdn.bootcss.com/jquery/2.1.4/jquery.min.js"></script>
-    <script src="public/js/highlight.min.js"></script>
-    <script src="public/js/post.js"></script>
-    <script>
-    $(document).ready(function() {
-        $('.highlight').each(function(i, block) {
-            hljs.highlightBlock(block);
-        });
-    });
-    </script>
+    <script src="/public/js/jquery-2.1.4.min.js"></script>
+    <script src="/public/js/highlight.min.js"></script>
+    <script src="/public/js/codepretty.js"></script>
 </body>
 
 </html>

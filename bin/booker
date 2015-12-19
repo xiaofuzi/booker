@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-
 var fs = require('fs'),
   clc = require('cli-color'),
   args = process.argv.slice(2),

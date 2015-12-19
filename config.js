@@ -4,7 +4,7 @@ var Book = {
 	author: 'yangxiaofu',
 	server: {
 		domain: 'yangxiaofu',
-		port: 3000
+		port: 5000
 	}
 }
 
