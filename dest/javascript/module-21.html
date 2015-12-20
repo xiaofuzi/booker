@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>
+        
+	module
+
+    </title>
+    <link rel="shortcut icon" href="/booker/es6/public/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="/booker/es6/public/css/public.css">
+    <link rel="stylesheet" href="/booker/es6/public/css/page.css">
+    <link rel="stylesheet" href="/booker/es6/public/css/monokai.min.css">
+</head>
+
+<body>
+    <div id="headerWrapper" class="cf">
+        <header id="header" class="cf">
+            <div id="logo">
+                <h1 class="logo">
+					<a href="/"> 
+	Learn ECMAScript6 the easy way
+</a>
+				</h1>
+            </div>
+        </header>
+    </div>
+    
+<div id="pageWrapper">
+	<div id="mainContent">
+		<article class="post">
+			<h1 id="module">Module</h1>
+<p>ES6的Class只是面向对象编程的语法糖，升级了ES5的构造函数的原型链继承的写法，并没有解决模块化问题。Module功能就是为了解决这个问题而提出的。</p>
+<p>历史上，JavaScript一直没有模块（module）体系，无法将一个大程序拆分成互相依赖的小文件，再用简单的方法拼装起来。其他语言都有这项功能，比如Ruby的<code>require</code>、Python的<code>import</code>，甚至就连CSS都有<code>@import</code>，但是JavaScript任何这方面的支持都没有，这对开发大型的、复杂的项目形成了巨大障碍。</p>
+<p>在ES6之前，社区制定了一些模块加载方案，最主要的有CommonJS和AMD两种。前者用于服务器，后者用于浏览器。ES6在语言规格的层面上，实现了模块功能，而且实现得相当简单，完全可以取代现有的CommonJS和AMD规范，成为浏览器和服务器通用的模块解决方案。</p>
+<p>ES6模块的设计思想，是尽量的静态化，使得编译时就能确定模块的依赖关系，以及输入和输出的变量。CommonJS和AMD模块，都只能在运行时确定这些东西。比如，CommonJS模块就是对象，输入时必须查找对象属性。</p>
+<pre><code class="lang-javascript">// CommonJS模块
+let { stat, exists, readFile } = require(&#39;fs&#39;);
+
+// 等同于
+let _fs = require(&#39;fs&#39;);
+let stat = _fs.stat, exists = _fs.exists, readfile = _fs.readfile;
+</code></pre>
+<p>上面代码的实质是整体加载<code>fs</code>模块（即加载<code>fs</code>的所有方法），生成一个对象（<code>_fs</code>），然后再从这个对象上面读取3个方法。这种加载称为“运行时加载”，因为只有运行时才能得到这个对象，导致完全没办法在编译时做“静态优化”。</p>
+<p>ES6模块不是对象，而是通过<code>export</code>命令显式指定输出的代码，输入时也采用静态命令的形式。</p>
+<pre><code class="lang-javascript">// ES6模块
+import { stat, exists, readFile } from &#39;fs&#39;;
+</code></pre>
+<p>上面代码的实质是从<code>fs</code>模块加载3个方法，其他方法不加载。这种加载称为“编译时加载”，即ES6可以在编译时就完成模块编译，效率要比CommonJS模块的加载方式高。当然，这也导致了没法引用ES6模块本身，因为它不是对象。</p>
+<p>由于ES6模块是编译时加载，使得静态分析成为可能。有了它，就能进一步拓宽JavaScript的语法，比如引入宏（macro）和类型检验（type system）这些只能靠静态分析实现的功能。</p>
+<p>除了静态加载带来的各种好处，ES6模块还有以下好处。</p>
+<ul>
+<li>不再需要UMD模块格式了，将来服务器和浏览器都会支持ES6模块格式。目前，通过各种工具库，其实已经做到了这一点。</li>
+<li>将来浏览器的新API就能用模块格式提供，不再必要做成全局变量或者<code>navigator</code>对象的属性。</li>
+<li>不再需要对象作为命名空间（比如<code>Math</code>对象），未来这些功能可以通过模块提供。</li>
+</ul>
+<h2 id="-">严格模式</h2>
+<p>ES6的模块自动采用严格模式，不管你有没有在模块头部加上<code>&quot;use strict&quot;</code>。</p>
+<p>严格模式主要有以下限制。</p>
+<ul>
+<li>变量必须声明后再使用</li>
+<li>函数的参数不能有同名属性，否则报错</li>
+<li>不能使用<code>with</code>语句</li>
+<li>不能对只读属性赋值，否则报错</li>
+<li>不能使用前缀0表示八进制数，否则报错</li>
+<li>不能删除不可删除的属性，否则报错</li>
+<li>不能删除变量<code>delete prop</code>，会报错，只能删除属性<code>delete global[prop]</code></li>
+<li><code>eval</code>不会在它的外层作用域引入变量</li>
+<li><code>eval</code>和<code>arguments</code>不能被重新赋值</li>
+<li><code>arguments</code>不会自动反映函数参数的变化</li>
+<li>不能使用<code>arguments.callee</code></li>
+<li>不能使用<code>arguments.caller</code></li>
+<li>禁止<code>this</code>指向全局对象</li>
+<li>不能使用<code>fn.caller</code>和<code>fn.arguments</code>获取函数调用的堆栈</li>
+<li>增加了保留字（比如<code>protected</code>、<code>static</code>和<code>interface</code>）</li>
+</ul>
+<p>上面这些限制，模块都必须遵守。由于严格模式是ES5引入的，不属于ES6，所以请参阅相关ES5书籍，本书不再详细介绍了。</p>
+<h2 id="export-">export命令</h2>
+<p>模块功能主要由两个命令构成：<code>export</code>和<code>import</code>。<code>export</code>命令用于规定模块的对外接口，<code>import</code>命令用于输入其他模块提供的功能。</p>
+<p>一个模块就是一个独立的文件。该文件内部的所有变量，外部无法获取。如果你希望外部能够读取模块内部的某个变量，就必须使用<code>export</code>关键字输出该变量。下面是一个JS文件，里面使用<code>export</code>命令输出变量。</p>
+<pre><code class="lang-javascript">// profile.js
+export var firstName = &#39;Michael&#39;;
+export var lastName = &#39;Jackson&#39;;
+export var year = 1958;
+</code></pre>
+<p>上面代码是<code>profile.js</code>文件，保存了用户信息。ES6将其视为一个模块，里面用export命令对外部输出了三个变量。</p>
+<p>export的写法，除了像上面这样，还有另外一种。</p>
+<pre><code class="lang-javascript">// profile.js
+var firstName = &#39;Michael&#39;;
+var lastName = &#39;Jackson&#39;;
+var year = 1958;
+
+export {firstName, lastName, year};
+</code></pre>
+<p>上面代码在<code>export</code>命令后面，使用大括号指定所要输出的一组变量。它与前一种写法（直接放置在var语句前）是等价的，但是应该优先考虑使用这种写法。因为这样就可以在脚本尾部，一眼看清楚输出了哪些变量。</p>
+<p>export命令除了输出变量，还可以输出函数或类（class）。</p>
+<pre><code class="lang-javascript">export function multiply (x, y) {
+  return x * y;
+};
+</code></pre>
+<p>上面代码对外输出一个函数<code>multiply</code>。</p>
+<p>通常情况下，<code>export</code>输出的变量就是本来的名字，但是可以使用<code>as</code>关键字重命名。</p>
+<pre><code class="lang-javascript">function v1() { ... }
+function v2() { ... }
+
+export {
+  v1 as streamV1,
+  v2 as streamV2,
+  v2 as streamLatestVersion
+};
+</code></pre>
+<p>上面代码使用<code>as</code>关键字，重命名了函数<code>v1</code>和<code>v2</code>的对外接口。重命名后，<code>v2</code>可以用不同的名字输出两次。</p>
+<p>最后，<code>export</code>命令可以出现在模块的任何位置，只要处于模块顶层就可以。如果处于块级作用域内，就会报错，下面的<code>import</code>命令也是如此。这是因为处于条件代码块之中，就没法做静态优化了，违背了ES6模块的设计初衷。</p>
+<pre><code class="lang-javascript">function foo() {
+  export default &#39;bar&#39; // SyntaxError
+}
+foo()
+</code></pre>
+<p>上面代码中，<code>export</code>语句放在函数之中，结果报错。</p>
+<p><code>export</code>语句输出的值是动态绑定，绑定其所在的模块。</p>
+<pre><code class="lang-javascript">export var foo = &#39;bar&#39;;
+setTimeout(() =&gt; foo = &#39;baz&#39;, 500);
+</code></pre>
+<p>上面代码输出变量<code>foo</code>，值为<code>bar</code>，500毫秒之后变成<code>baz</code>。</p>
+<h2 id="import-">import命令</h2>
+<p>使用<code>export</code>命令定义了模块的对外接口以后，其他JS文件就可以通过<code>import</code>命令加载这个模块（文件）。</p>
+<pre><code class="lang-javascript">// main.js
+
+import {firstName, lastName, year} from &#39;./profile&#39;;
+
+function setName(element) {
+  element.textContent = firstName + &#39; &#39; + lastName;
+}
+</code></pre>
+<p>上面代码的<code>import</code>命令，就用于加载<code>profile.js</code>文件，并从中输入变量。<code>import</code>命令接受一个对象（用大括号表示），里面指定要从其他模块导入的变量名。大括号里面的变量名，必须与被导入模块（<code>profile.js</code>）对外接口的名称相同。</p>
+<p>如果想为输入的变量重新取一个名字，import命令要使用<code>as</code>关键字，将输入的变量重命名。</p>
+<pre><code class="lang-javascript">import { lastName as surname } from &#39;./profile&#39;;
+</code></pre>
+<p>注意，<code>import</code>命令具有提升效果，会提升到整个模块的头部，首先执行。</p>
+<pre><code class="lang-javascript">foo();
+
+import { foo } from &#39;my_module&#39;;
+</code></pre>
+<p>上面的代码不会报错，因为<code>import</code>的执行早于<code>foo</code>的调用。</p>
+<p>如果在一个模块之中，先输入后输出同一个模块，<code>import</code>语句可以与<code>export</code>语句写在一起。</p>
+<pre><code class="lang-javascript">export { es6 as default } from &#39;./someModule&#39;;
+
+// 等同于
+import { es6 } from &#39;./someModule&#39;;
+export default es6;
+</code></pre>
+<p>上面代码中，<code>export</code>和<code>import</code>语句可以结合在一起，写成一行。但是从可读性考虑，不建议采用这种写法，而应该采用标准写法。</p>
+<p>另外，ES7有一个<a href="https://github.com/leebyron/ecmascript-more-export-from">提案</a>，简化先输入后输出的写法，拿掉输出时的大括号。</p>
+<pre><code class="lang-javascript">// 提案的写法
+export v from &quot;mod&quot;;
+
+// 现行的写法
+export {v} from &quot;mod&quot;;
+</code></pre>
+<p><code>import</code>语句会执行所加载的模块，因此可以有下面的写法。</p>
+<pre><code class="lang-javascript">import &#39;lodash&#39;
+</code></pre>
+<p>上面代码仅仅执行<code>lodash</code>模块，但是不输入任何值。</p>
+<h2 id="-">模块的整体加载</h2>
+<p>除了指定加载某个输出值，还可以使用整体加载，即用星号（<code>*</code>）指定一个对象，所有输出值都加载在这个对象上面。</p>
+<p>下面是一个<code>circle.js</code>文件，它输出两个方法<code>area</code>和<code>circumference</code>。</p>
+<pre><code class="lang-javascript">// circle.js
+
+export function area(radius) {
+  return Math.PI * radius * radius;
+}
+
+export function circumference(radius) {
+  return 2 * Math.PI * radius;
+}
+</code></pre>
+<p>现在，加载这个模块。</p>
+<pre><code class="lang-javascript">// main.js
+
+import { area, circumference } from &#39;./circle&#39;;
+
+console.log(&quot;圆面积：&quot; + area(4));
+console.log(&quot;圆周长：&quot; + circumference(14));
+</code></pre>
+<p>上面写法是逐一指定要加载的方法，整体加载的写法如下。</p>
+<pre><code class="lang-javascript">import * as circle from &#39;./circle&#39;;
+
+console.log(&quot;圆面积：&quot; + circle.area(4));
+console.log(&quot;圆周长：&quot; + circle.circumference(14));
+</code></pre>
+<h2 id="export-default-">export default命令</h2>
+<p>从前面的例子可以看出，使用<code>import</code>命令的时候，用户需要知道所要加载的变量名或函数名，否则无法加载。但是，用户肯定希望快速上手，未必愿意阅读文档，去了解模块有哪些属性和方法。</p>
+<p>为了给用户提供方便，让他们不用阅读文档就能加载模块，就要用到<code>export default</code>命令，为模块指定默认输出。</p>
+<pre><code class="lang-javascript">// export-default.js
+export default function () {
+  console.log(&#39;foo&#39;);
+}
+</code></pre>
+<p>上面代码是一个模块文件<code>export-default.js</code>，它的默认输出是一个函数。</p>
+<p>其他模块加载该模块时，import命令可以为该匿名函数指定任意名字。</p>
+<pre><code class="lang-javascript">// import-default.js
+import customName from &#39;./export-default&#39;;
+customName(); // &#39;foo&#39;
+</code></pre>
+<p>上面代码的import命令，可以用任意名称指向<code>export-default.js</code>输出的方法，这时就不需要知道原模块输出的函数名。需要注意的是，这时<code>import</code>命令后面，不使用大括号。</p>
+<p><code>export default</code>命令用在非匿名函数前，也是可以的。</p>
+<pre><code class="lang-javascript">// export-default.js
+export default function foo() {
+  console.log(&#39;foo&#39;);
+}
+
+// 或者写成
+
+function foo() {
+  console.log(&#39;foo&#39;);
+}
+
+export default foo;
+</code></pre>
+<p>上面代码中，<code>foo</code>函数的函数名<code>foo</code>，在模块外部是无效的。加载的时候，视同匿名函数加载。</p>
+<p>下面比较一下默认输出和正常输出。</p>
+<pre><code class="lang-javascript">// 输出
+export default function crc32() {
+  // ...
+}
+// 输入
+import crc32 from &#39;crc32&#39;;
+
+// 输出
+export function crc32() {
+  // ...
+};
+// 输入
+import {crc32} from &#39;crc32&#39;;
+</code></pre>
+<p>上面代码的两组写法，第一组是使用<code>export default</code>时，对应的<code>import</code>语句不需要使用大括号；第二组是不使用<code>export default</code>时，对应的<code>import</code>语句需要使用大括号。</p>
+<p><code>export default</code>命令用于指定模块的默认输出。显然，一个模块只能有一个默认输出，因此<code>export deault</code>命令只能使用一次。所以，<code>import</code>命令后面才不用加大括号，因为只可能对应一个方法。</p>
+<p>本质上，<code>export default</code>就是输出一个叫做<code>default</code>的变量或方法，然后系统允许你为它取任意名字。所以，下面的写法是有效的。</p>
+<pre><code class="lang-javascript">// modules.js
+function add(x, y) {
+  return x * y;
+};
+export {add as default};
+
+// app.js
+import { default as xxx } from &#39;modules&#39;;
+</code></pre>
+<p>有了<code>export default</code>命令，输入模块时就非常直观了，以输入jQuery模块为例。</p>
+<pre><code class="lang-javascript">import $ from &#39;jquery&#39;;
+</code></pre>
+<p>如果想在一条import语句中，同时输入默认方法和其他变量，可以写成下面这样。</p>
+<pre><code class="lang-javascript">import customName, { otherMethod } from &#39;./export-default&#39;;
+</code></pre>
+<p>如果要输出默认的值，只需将值跟在<code>export default</code>之后即可。</p>
+<pre><code class="lang-javascript">export default 42;
+</code></pre>
+<p><code>export default</code>也可以用来输出类。</p>
+<pre><code class="lang-javascript">// MyClass.js
+export default class { ... }
+
+// main.js
+import MyClass from &#39;MyClass&#39;
+let o = new MyClass();
+</code></pre>
+<h2 id="-">模块的继承</h2>
+<p>模块之间也可以继承。</p>
+<p>假设有一个<code>circleplus</code>块，继承了<code>circle</code>模块。</p>
+<pre><code class="lang-javascript">// circleplus.js
+
+export * from &#39;circle&#39;;
+export var e = 2.71828182846;
+export default function(x) {
+  return Math.exp(x);
+}
+</code></pre>
+<p>上面代码中的<code>export *</code>，表示再输出<code>circle</code>模块的所有属性和方法。注意，<code>export *</code>命令会忽略<code>circle</code>模块的<code>default</code>方法。然后，上面代码又输出了自定义的<code>e</code>变量和默认方法。</p>
+<p>这时，也可以将<code>circle</code>的属性或方法，改名后再输出。</p>
+<pre><code class="lang-javascript">// circleplus.js
+
+export { area as circleArea } from &#39;circle&#39;;
+</code></pre>
+<p>上面代码表示，只输出<code>circle</code>模块的<code>area</code>方法，且将其改名为<code>circleArea</code>。</p>
+<p>加载上面模块的写法如下。</p>
+<pre><code class="lang-javascript">// main.js
+
+import * as math from &quot;circleplus&quot;;
+import exp from &quot;circleplus&quot;;
+console.log(exp(math.e));
+</code></pre>
+<p>上面代码中的<code>import exp</code>表示，将<code>circleplus</code>模块的默认方法加载为<code>exp</code>方法。</p>
+<h2 id="es6-">ES6模块加载的实质</h2>
+<p>ES6模块加载的机制，与CommonJS模块完全不同。CommonJS模块输出的是一个值的拷贝，而ES6模块输出的是值的引用。</p>
+<p>CommonJS模块输出的是被输出值的拷贝，也就是说，一旦输出一个值，模块内部的变化就影响不到这个值。请看下面这个模块文件<code>lib.js</code>的例子。</p>
+<pre><code class="lang-javascript">// lib.js
+var counter = 3;
+function incCounter() {
+  counter++;
+}
+module.exports = {
+  counter: counter,
+  incCounter: incCounter,
+};
+</code></pre>
+<p>上面代码输出内部变量<code>counter</code>和改写这个变量的内部方法<code>incCounter</code>。然后，在<code>main.js</code>里面加载这个模块。</p>
+<pre><code class="lang-javascript">// main.js
+var counter = require(&#39;./lib&#39;).counter;
+var incCounter = require(&#39;./lib&#39;).incCounter;
+
+console.log(counter);  // 3
+incCounter();
+console.log(counter); // 3
+</code></pre>
+<p>上面代码说明，<code>counter</code>输出以后，<code>lib.js</code>模块内部的变化就影响不到<code>counter</code>了。</p>
+<p>ES6模块的运行机制与CommonJS不一样，它遇到模块加载命令<code>import</code>时，不会去执行模块，而是只生成一个动态的只读引用。等到真的需要用到时，再到模块里面去取值，换句话说，ES6的输入有点像Unix系统的”符号连接“，原始值变了，输入值也会跟着变。因此，ES6模块是动态引用，并且不会缓存值，模块里面的变量绑定其所在的模块。</p>
+<p>还是举上面的例子。</p>
+<pre><code class="lang-javascript">// lib.js
+export let counter = 3;
+export function incCounter() {
+  counter++;
+}
+
+// main.js
+import { counter, incCounter } from &#39;./lib&#39;;
+console.log(counter); // 3
+incCounter();
+console.log(counter); // 4
+</code></pre>
+<p>上面代码说明，ES6模块输入的变量<code>counter</code>是活的，完全反应其所在模块<code>lib.js</code>内部的变化。</p>
+<p>再举一个出现在<code>export</code>一节中的例子。</p>
+<pre><code class="lang-javascript">// m1.js
+export var foo = &#39;bar&#39;;
+setTimeout(() =&gt; foo = &#39;baz&#39;, 500);
+
+// m2.js
+import {foo} from &#39;./m1.js&#39;;
+console.log(foo);
+setTimeout(() =&gt; console.log(foo), 500);
+</code></pre>
+<p>上面代码中，<code>m1.js</code>的变量<code>foo</code>，在刚加载时等于<code>bar</code>，过了500毫秒，又变为等于<code>baz</code>。</p>
+<p>让我们看看，<code>m2.js</code>能否正确读取这个变化。</p>
+<pre><code class="lang-bash">$ babel-node m2.js
+
+bar
+baz
+</code></pre>
+<p>上面代码表明，ES6模块不会缓存运行结果，而是动态地去被加载的模块取值，并且变量总是绑定其所在的模块。</p>
+<p>由于ES6输入的模块变量，只是一个”符号连接“，所以这个变量是只读的，对它进行重新赋值会报错。</p>
+<pre><code class="lang-javascript">// lib.js
+export let obj = {};
+
+// main.js
+import { obj } from &#39;./lib&#39;;
+
+obj.prop = 123; // OK
+obj = {}; // TypeError
+</code></pre>
+<p>上面代码中，<code>main.js</code>从<code>lib.js</code>输入变量<code>obj</code>，可以对<code>obj</code>添加属性，但是重新赋值就会报错。因为变量<code>obj</code>指向的地址是只读的，不能重新赋值，这就好比<code>main.js</code>创造了一个名为<code>obj</code>的const变量。</p>
+<h2 id="-">循环加载</h2>
+<p>“循环加载”（circular dependency）指的是，<code>a</code>脚本的执行依赖<code>b</code>脚本，而<code>b</code>脚本的执行又依赖<code>a</code>脚本。</p>
+<pre><code class="lang-javascript">// a.js
+var b = require(&#39;b&#39;);
+
+// b.js
+var a = require(&#39;a&#39;);
+</code></pre>
+<p>通常，“循环加载”表示存在强耦合，如果处理不好，还可能导致递归加载，使得程序无法执行，因此应该避免出现。</p>
+<p>但是实际上，这是很难避免的，尤其是依赖关系复杂的大项目，很容易出现<code>a</code>依赖b，<code>b</code>依赖<code>c</code>，<code>c</code>又依赖<code>a</code>这样的情况。这意味着，模块加载机制必须考虑“循环加载”的情况。</p>
+<p>对于JavaScript语言来说，目前最常见的两种模块格式CommonJS和ES6，处理“循环加载”的方法是不一样的，返回的结果也不一样。</p>
+<h3 id="commonjs-">CommonJS模块的加载原理</h3>
+<p>介绍ES6如何处理&quot;循环加载&quot;之前，先介绍目前最流行的CommonJS模块格式的加载原理。</p>
+<p>CommonJS的一个模块，就是一个脚本文件。<code>require</code>命令第一次加载该脚本，就会执行整个脚本，然后在内存生成一个对象。</p>
+<pre><code class="lang-javascript">{
+  id: &#39;...&#39;,
+  exports: { ... },
+  loaded: true,
+  ...
+}
+</code></pre>
+<p>上面代码中，该对象的<code>id</code>属性是模块名，<code>exports</code>属性是模块输出的各个接口，<code>loaded</code>属性是一个布尔值，表示该模块的脚本是否执行完毕。其他还有很多属性，这里都省略了。</p>
+<p>以后需要用到这个模块的时候，就会到<code>exports</code>属性上面取值。即使再次执行<code>require</code>命令，也不会再次执行该模块，而是到缓存之中取值。也就是说，CommonJS模块无论加载多少次，都只会在第一次加载时运行一次，以后再加载，就返回第一次运行的结果，除非手动清除系统缓存。</p>
+<h3 id="commonjs-">CommonJS模块的循环加载</h3>
+<p>CommonJS模块的重要特性是加载时执行，即脚本代码在<code>require</code>的时候，就会全部执行。一旦出现某个模块被&quot;循环加载&quot;，就只输出已经执行的部分，还未执行的部分不会输出。</p>
+<p>让我们来看，Node<a href="https://nodejs.org/api/modules.html#modules_cycles">官方文档</a>里面的例子。脚本文件<code>a.js</code>代码如下。</p>
+<pre><code class="lang-javascript">exports.done = false;
+var b = require(&#39;./b.js&#39;);
+console.log(&#39;在 a.js 之中，b.done = %j&#39;, b.done);
+exports.done = true;
+console.log(&#39;a.js 执行完毕&#39;);
+</code></pre>
+<p>上面代码之中，<code>a.js</code>脚本先输出一个<code>done</code>变量，然后加载另一个脚本文件<code>b.js</code>。注意，此时<code>a.js</code>代码就停在这里，等待<code>b.js</code>执行完毕，再往下执行。</p>
+<p>再看<code>b.js</code>的代码。</p>
+<pre><code class="lang-javascript">exports.done = false;
+var a = require(&#39;./a.js&#39;);
+console.log(&#39;在 b.js 之中，a.done = %j&#39;, a.done);
+exports.done = true;
+console.log(&#39;b.js 执行完毕&#39;);
+</code></pre>
+<p>上面代码之中，<code>b.js</code>执行到第二行，就会去加载<code>a.js</code>，这时，就发生了“循环加载”。系统会去<code>a.js</code>模块对应对象的<code>exports</code>属性取值，可是因为<code>a.js</code>还没有执行完，从<code>exports</code>属性只能取回已经执行的部分，而不是最后的值。</p>
+<p><code>a.js</code>已经执行的部分，只有一行。</p>
+<pre><code class="lang-javascript">exports.done = false;
+</code></pre>
+<p>因此，对于<code>b.js</code>来说，它从<code>a.js</code>只输入一个变量<code>done</code>，值为<code>false</code>。</p>
+<p>然后，<code>b.js</code>接着往下执行，等到全部执行完毕，再把执行权交还给<code>a.js</code>。于是，<code>a.js</code>接着往下执行，直到执行完毕。我们写一个脚本<code>main.js</code>，验证这个过程。</p>
+<pre><code class="lang-javascript">var a = require(&#39;./a.js&#39;);
+var b = require(&#39;./b.js&#39;);
+console.log(&#39;在 main.js 之中, a.done=%j, b.done=%j&#39;, a.done, b.done);
+</code></pre>
+<p>执行<code>main.js</code>，运行结果如下。</p>
+<pre><code class="lang-bash">$ node main.js
+
+在 b.js 之中，a.done = false
+b.js 执行完毕
+在 a.js 之中，b.done = true
+a.js 执行完毕
+在 main.js 之中, a.done=true, b.done=true
+</code></pre>
+<p>上面的代码证明了两件事。一是，在<code>b.js</code>之中，<code>a.js</code>没有执行完毕，只执行了第一行。二是，<code>main.js</code>执行到第二行时，不会再次执行<code>b.js</code>，而是输出缓存的<code>b.js</code>的执行结果，即它的第四行。</p>
+<pre><code class="lang-javascript">exports.done = true;
+</code></pre>
+<p>总之，CommonJS输入的是被输出值的拷贝，不是引用。</p>
+<p>另外，由于CommonJS模块遇到循环加载时，返回的是当前已经执行的部分的值，而不是代码全部执行后的值，两者可能会有差异。所以，输入变量的时候，必须非常小心。</p>
+<pre><code class="lang-javascript">var a = require(&#39;a&#39;); // 安全的写法
+var foo = require(&#39;a&#39;).foo; // 危险的写法
+
+exports.good = function (arg) {
+  return a.foo(&#39;good&#39;, arg); // 使用的是 a.foo 的最新值
+};
+
+exports.bad = function (arg) {
+  return foo(&#39;bad&#39;, arg); // 使用的是一个部分加载时的值
+};
+</code></pre>
+<p>上面代码中，如果发生循环加载，<code>require(&#39;a&#39;).foo</code>的值很可能后面会被改写，改用<code>require(&#39;a&#39;)</code>会更保险一点。</p>
+<h3 id="es6-">ES6模块的循环加载</h3>
+<p>ES6处理“循环加载”与CommonJS有本质的不同。ES6模块是动态引用，遇到模块加载命令<code>import</code>时，不会去执行模块，只是生成一个指向被加载模块的引用，需要开发者自己保证，真正取值的时候能够取到值。</p>
+<p>请看下面的例子（摘自 Dr. Axel Rauschmayer 的<a href="http://exploringjs.com/es6/ch_modules.html">《Exploring ES6》</a>）。</p>
+<pre><code class="lang-javascript">// a.js
+import {bar} from &#39;./b.js&#39;;
+export function foo() {
+  bar();
+  console.log(&#39;执行完毕&#39;);
+}
+foo();
+
+// b.js
+import {foo} from &#39;./a.js&#39;;
+export function bar() {
+  if (Math.random() &gt; 0.5) {
+    foo();
+  }
+}
+</code></pre>
+<p>按照CommonJS规范，上面的代码是没法执行的。<code>a</code>先加载<code>b</code>，然后<code>b</code>又加载<code>a</code>，这时<code>a</code>还没有任何执行结果，所以输出结果为<code>null</code>，即对于<code>b.js</code>来说，变量<code>foo</code>的值等于<code>null</code>，后面的<code>foo()</code>就会报错。</p>
+<p>但是，ES6可以执行上面的代码。</p>
+<pre><code class="lang-bash">$ babel-node a.js
+
+执行完毕
+</code></pre>
+<p><code>a.js</code>之所以能够执行，原因就在于ES6加载的变量，都是动态引用其所在的模块。只要引用是存在的，代码就能执行。</p>
+<p>我们再来看ES6模块加载器<a href="https://github.com/ModuleLoader/es6-module-loader/blob/master/docs/circular-references-bindings.md">SystemJS</a>给出的一个例子。</p>
+<pre><code class="lang-javascript">// even.js
+import { odd } from &#39;./odd&#39;
+export var counter = 0;
+export function even(n) {
+  counter++;
+  return n == 0 || odd(n - 1);
+}
+
+// odd.js
+import { even } from &#39;./even&#39;;
+export function odd(n) {
+  return n != 0 &amp;&amp; even(n - 1);
+}
+</code></pre>
+<p>上面代码中，<code>even.js</code>里面的函数<code>even</code>有一个参数<code>n</code>，只要不等于0，就会减去1，传入加载的<code>odd()</code>。<code>odd.js</code>也会做类似操作。</p>
+<p>运行上面这段代码，结果如下。</p>
+<pre><code class="lang-javascript">$ babel-node
+&gt; import * as m from &#39;./even.js&#39;;
+&gt; m.even(10);
+true
+&gt; m.counter
+6
+&gt; m.even(20)
+true
+&gt; m.counter
+17
+</code></pre>
+<p>上面代码中，参数<code>n</code>从10变为0的过程中，<code>foo()</code>一共会执行6次，所以变量<code>counter</code>等于6。第二次调用<code>even（）</code>时，参数<code>n</code>从20变为0，<code>foo()</code>一共会执行11次，加上前面的6次，所以变量<code>counter</code>等于17。</p>
+<p>这个例子要是改写成CommonJS，就根本无法执行，会报错。</p>
+<pre><code class="lang-javascript">// even.js
+var odd = require(&#39;./odd&#39;);
+var counter = 0;
+exports.counter = counter;
+exports.even = function(n) {
+  counter++;
+  return n == 0 || odd(n - 1);
+}
+
+// odd.js
+var even = require(&#39;./even&#39;).even;
+module.exports = function(n) {
+  return n != 0 &amp;&amp; even(n - 1);
+}
+</code></pre>
+<p>上面代码中，<code>even.js</code>加载<code>odd.js</code>，而<code>odd.js</code>又去加载<code>even.js</code>，形成“循环加载”。这时，执行引擎就会输出<code>even.js</code>已经执行的部分（不存在任何结果），所以在<code>odd.js</code>之中，变量<code>even</code>等于<code>null</code>，等到后面调用<code>even(n-1)</code>就会报错。</p>
+<pre><code class="lang-bash">$ node
+&gt; var m = require(&#39;./even&#39;);
+&gt; m.even(10)
+TypeError: even is not a function
+</code></pre>
+<h2 id="es6-">ES6模块的转码</h2>
+<p>浏览器目前还不支持ES6模块，为了现在就能使用，可以将转为ES5的写法。除了Babel可以用来转码之外，还有以下两个方法，也可以用来转码。</p>
+<h3 id="es6-module-transpiler">ES6 module transpiler</h3>
+<p><a href="https://github.com/esnext/es6-module-transpiler">ES6 module transpiler</a>是square公司开源的一个转码器，可以将ES6模块转为CommonJS模块或AMD模块的写法，从而在浏览器中使用。</p>
+<p>首先，安装这个转玛器。</p>
+<pre><code class="lang-bash">$ npm install -g es6-module-transpiler
+</code></pre>
+<p>然后，使用<code>compile-modules convert</code>命令，将ES6模块文件转码。</p>
+<pre><code class="lang-bash">$ compile-modules convert file1.js file2.js
+</code></pre>
+<p><code>-o</code>参数可以指定转码后的文件名。</p>
+<pre><code class="lang-bash">$ compile-modules convert -o out.js file1.js
+</code></pre>
+<h3 id="systemjs">SystemJS</h3>
+<p>另一种解决方法是使用<a href="https://github.com/systemjs/systemjs">SystemJS</a>。它是一个垫片库（polyfill），可以在浏览器内加载ES6模块、AMD模块和CommonJS模块，将其转为ES5格式。它在后台调用的是Google的Traceur转码器。</p>
+<p>使用时，先在网页内载入system.js文件。</p>
+<pre><code class="lang-html">&lt;script src=&quot;system.js&quot;&gt;&lt;/script&gt;
+</code></pre>
+<p>然后，使用<code>System.import</code>方法加载模块文件。</p>
+<pre><code class="lang-html">&lt;script&gt;
+  System.import(&#39;./app&#39;);
+&lt;/script&gt;
+</code></pre>
+<p>上面代码中的<code>./app</code>，指的是当前目录下的app.js文件。它可以是ES6模块文件，<code>System.import</code>会自动将其转码。</p>
+<p>需要注意的是，<code>System.import</code>使用异步加载，返回一个Promise对象，可以针对这个对象编程。下面是一个模块文件。</p>
+<pre><code class="lang-javascript">// app/es6-file.js:
+
+export class q {
+  constructor() {
+    this.es6 = &#39;hello&#39;;
+  }
+}
+</code></pre>
+<p>然后，在网页内加载这个模块文件。</p>
+<pre><code class="lang-html">&lt;script&gt;
+
+System.import(&#39;app/es6-file&#39;).then(function(m) {
+  console.log(new m.q().es6); // hello
+});
+
+&lt;/script&gt;
+</code></pre>
+<p>上面代码中，<code>System.import</code>方法返回的是一个Promise对象，所以可以用then方法指定回调函数。</p>
+
+		</article>
+	</div>
+</div>
+
+    <footer id="footer">
+        <i id="upToTop"></i>
+        <p>
+            <span>作者-阮一峰：<a href="http://es6.ruanyifeng.com/">http://es6.ruanyifeng.com/</a></span>|联系方式 <span>|</span> <a href="javascript:void(0);">yangxiaofuPL@163.com</a>
+        </p>
+    </footer>
+    <script src="/booker/es6/public/js/jquery-2.1.4.min.js"></script>
+    <script src="/booker/es6/public/js/highlight.min.js"></script>
+    <script src="/booker/es6/public/js/codepretty.js"></script>
+</body>
+
+</html>
