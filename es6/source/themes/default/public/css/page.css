@@ -25,8 +25,8 @@ a:hover{
     position: relative;
     max-width: 800px;
     margin: 0 auto;
-    padding: 20px 10px;
-    border-bottom: dotted 2px ##A21518;
+    padding: 20px 0;
+    border-bottom: dotted 2px #222;
 }
 
 #logo {
@@ -35,7 +35,7 @@ a:hover{
 
 #logo a {
     font-weight: bold;
-    font-size: 24px;
+    font-size: 32px;
 }
 
 
@@ -47,7 +47,6 @@ a:hover{
     margin: 0 auto;
 }
 
-
 /*post a global style*/
 #mainContent .post-body a{
     color: #4183C4;
@@ -55,18 +54,18 @@ a:hover{
 
 
 #mainContent h1 {
-    font-size: 18px;
+    font-size: 24px;
     font-weight: 600;
 }
 
 #mainContent h2 {
-    font-size: 16px;
+    font-size: 20px;
     font-weight: 500;
     margin-bottom: 5px;
 }
 
 #mainContent h3 {
-    font-size: 15px;
+    font-size: 18px;
     font-weight: 500;
     margin-bottom: 5px;
 }
