@@ -9,6 +9,10 @@
   "bin": {
     "booker": "./bin/booker"
   },
+  "repository" : {
+    "type" : "git",
+    "url" : "https://github.com/xiaofuzi/booker"
+  },
   "author": "",
   "license": "ISC",
   "dependencies": {

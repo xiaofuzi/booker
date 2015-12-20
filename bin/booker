@@ -21,7 +21,8 @@ switch (command){
     log.bold(require('../lib/cli/help')());
     break;
   case 'server':
-    if (args[0] === '-w'){
+  case 's':
+    if (args[0] === '-w'||args[0] === '-v'){
       require('../lib/cli/watch')();
     }
     require('../lib/cli/server')();
