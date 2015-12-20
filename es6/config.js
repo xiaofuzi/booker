@@ -4,7 +4,7 @@ var Book = {
 	author: '阮一峰',
 	server: {
 		domain: 'yangxiaofu',
-		subdir: 'booker/es6/',
+		subdir: 'booker/es6/dest',
 		port: 8000
 	}
 }
