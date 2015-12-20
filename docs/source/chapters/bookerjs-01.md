@@ -30,5 +30,8 @@ booker g
 ```bash
 booker server -w
 ```
+## demo
+
+阮一峰es6文集：http://yangxiaofu.com/booker/es6/dest/
 
 https://github.com/xiaofuzi/booker
