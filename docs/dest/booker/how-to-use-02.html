@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>
+        
+	how-to-use
+
+    </title>
+    <link rel="shortcut icon" href="/booker/docs/dest/public/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="/booker/docs/dest/public/css/public.css">
+    <link rel="stylesheet" href="/booker/docs/dest/public/css/page.css">
+    <link rel="stylesheet" href="/booker/docs/dest/public/css/monokai.min.css">
+</head>
+
+<body>
+    <div id="headerWrapper" class="cf">
+        <header id="header" class="cf">
+            <div id="logo">
+                <h1 class="logo">
+					<a href="/"> 
+	booker.js——a simple book framework
+</a>
+				</h1>
+            </div>
+        </header>
+    </div>
+    
+<div id="pageWrapper">
+	<div id="mainContent">
+		<article class="post">
+			<h1 id="how-to-use-">how to use?</h1>
+<ul>
+<li>安装好后使用初始化命令创建一个示例</li>
+</ul>
+<pre><code class="lang-node">booker init
+</code></pre>
+<p>该命令会创建一个示例项目(这里借助于阮一峰的es6书籍)，包含如下文件：</p>
+<h2 id="-">目录结构</h2>
+<ul>
+<li>source<ul>
+<li>chapters[存放章节文本]</li>
+<li>pages[相关页面]</li>
+<li>themes[渲染主题]<ul>
+<li>layout[对应主题使用的模板]<ul>
+<li>chapter.swig[章节模板]</li>
+<li>index.swig[首页模板]</li>
+<li>page模板</li>
+<li>自定义页面模板(和相关页面的文件名等同)</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>config.js[配置文件]</li>
+<li>dest[编译后的文件，运行生成命令后创建]</li>
+</ul>
+<h2 id="-">章节文本</h2>
+<p>将章节文本以markdown格式存放在chapters文件夹下。注意文件名以 &#39;chaptername-01.md&#39;的形式，数字标明章节的顺序。</p>
+<h2 id="-">编译</h2>
+<pre><code class="lang-node">booker g
+booker generate
+</code></pre>
+<p>上面两条命令均可编译生成。</p>
+<h2 id="-">本地预览</h2>
+<pre><code class="lang-node">booker s
+booker server
+</code></pre>
+<p>运行如上命令即可预览书籍</p>
+<h2 id="-">事实预览</h2>
+<pre><code class="lang-node">booker  s -v
+booker s -w
+</code></pre>
+<p>加上 -v 或是 -w 参数就可以达到实时预览的效果 </p>
+
+		</article>
+	</div>
+</div>
+
+    <footer id="footer">
+        <i id="upToTop"></i>
+        <p>
+            <span>作者-阮一峰：<a href="http://es6.ruanyifeng.com/">http://es6.ruanyifeng.com/</a></span>|联系方式 <span>|</span> <a href="javascript:void(0);">yangxiaofuPL@163.com</a>
+        </p>
+    </footer>
+    <script src="/booker/docs/dest/public/js/jquery-2.1.4.min.js"></script>
+    <script src="/booker/docs/dest/public/js/highlight.min.js"></script>
+    <script src="/booker/docs/dest/public/js/codepretty.js"></script>
+</body>
+
+</html>

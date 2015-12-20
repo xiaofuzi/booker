@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>
+        {% block title %} booker|a powerful book framework.{% endblock %}
+    </title>
+    <link rel="shortcut icon" href="/public/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="/public/css/public.css">
+    <link rel="stylesheet" href="/public/css/page.css">
+    <link rel="stylesheet" href="/public/css/monokai.min.css">
+</head>
+
+<body>
+    <div id="headerWrapper" class="cf">
+        <header id="header" class="cf">
+            <div id="logo">
+                <h1 class="logo">
+					<a href="/">{% block booktitle %} book title{% endblock %}</a>
+				</h1>
+            </div>
+        </header>
+    </div>
+    {% block content %}page content{% endblock %}
+    <footer id="footer">
+        <i id="upToTop"></i>
+        <p>
+            <span>作者-阮一峰：<a href="http://es6.ruanyifeng.com/">http://es6.ruanyifeng.com/</a></span>|联系方式 <span>|</span> <a href="javascript:void(0);">yangxiaofuPL@163.com</a>
+        </p>
+    </footer>
+    <script src="/public/js/jquery-2.1.4.min.js"></script>
+    <script src="/public/js/highlight.min.js"></script>
+    <script src="/public/js/codepretty.js"></script>
+</body>
+
+</html>
