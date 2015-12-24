@@ -1,10 +1,10 @@
 var Book = {
-	name: "javascript",
-	title: 'Learn ECMAScript6 the easy way',
-	author: '阮一峰',
+	name: "chapters",
+	title: 'booker.js-docs',
+	author: 'yangxiaofu',
 	server: {
 		domain: 'yangxiaofu',
-		subdir: '',
+		subdir: '/dest',
 		port: 8000
 	}
 }
